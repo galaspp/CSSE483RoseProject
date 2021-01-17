@@ -32,7 +32,6 @@ class MainActivity : AppCompatActivity() {
 
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
-            showCreateorEditTaskModal()
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
@@ -69,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.create_team_modal, null, false)
         builder.setView(view)
 
-        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+        builder.setPositiveButton("Save") { _, _ ->
 
         }
 
@@ -88,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.create_project_modal, null, false)
         builder.setView(view)
 
-        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+        builder.setPositiveButton("Save") { _, _ ->
 
         }
 
@@ -112,12 +111,34 @@ class MainActivity : AppCompatActivity() {
         var aa = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayVal)
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner2.adapter = aa
-        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+        builder.setPositiveButton("Save") { _, _ ->
 
         }
 
         builder.setNegativeButton(android.R.string.cancel, null)
 
+        builder.create().show()
+    }
+
+    private fun showAddRemoveModal()
+    {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Add/Remove Member")
+
+        val view = LayoutInflater.from(this).inflate(R.layout.add_remove_members_modal, null, false)
+        builder.setView(view)
+
+        //TODO: Add Spinner
+        builder.setPositiveButton(R.string.add) { _, _ ->
+
+        }
+
+
+        builder.setNeutralButton(android.R.string.cancel, null)
+
+        builder.setNegativeButton("Remove") { _, _ ->
+
+        }
         builder.create().show()
     }
 }

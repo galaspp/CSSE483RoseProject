@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/memberUsernamneTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/member_username" />
+
+    <EditText
+        android:id="@+id/edit_text_member_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_username"
+        android:ems="10"
+        android:inputType="text"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        />
+
+    <TextView
+        android:id="@+id/userPermissionLevelTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/user_permission_level" />
+
+    <Spinner
+        android:id="@+id/userPermissionSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
