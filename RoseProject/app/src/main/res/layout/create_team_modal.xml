@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/teamNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/team_name" />
+
+    <EditText
+        android:id="@+id/edit_text_team_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/insert_team_name"
+        android:ems="10"
+        android:inputType="text"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        />
+
+    <TextView
+        android:id="@+id/teamDescriptionTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/team_description" />
+
+
+    <EditText
+        android:id="@+id/edit_text_team_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_team_description"
+        android:ems="10"
+        android:inputType="text"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"/>
+
+    <TextView
+        android:id="@+id/teamMembersTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/team_members" />
+    
+    
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/backgroundcolor"
+        />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:background="@color/rosered"
+        android:textColor="@color/white"
+        android:text="@string/add_or_remove_team_members" />
+
+
+</LinearLayout>

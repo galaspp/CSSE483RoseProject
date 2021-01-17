@@ -15,4 +15,10 @@
     <string name="enter_username">Enter Username</string>
     <string name="enter_password">Enter Password</string>
     <string name="sign_in">Sign-in</string>
+    <string name="team_name">Team Name</string>
+    <string name="insert_team_name">Insert Team Name</string>
+    <string name="team_description">Team Description</string>
+    <string name="enter_team_description">Enter Team Description</string>
+    <string name="team_members">Team Members</string>
+    <string name="add_or_remove_team_members">Add or Remove Team Members</string>
 </resources>

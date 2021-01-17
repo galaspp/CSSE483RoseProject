@@ -1,7 +1,10 @@
 package edu.rosehulman.galaspp.roseproject
 
 import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.Menu
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
@@ -26,6 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
+            showCreateOrEditTeamModal()
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
@@ -49,5 +53,23 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+
+    private fun showCreateOrEditTeamModal()
+    {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Create Team?")
+
+        val view = LayoutInflater.from(this).inflate(R.layout.create_team_modal, null, false)
+        builder.setView(view)
+
+        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+
+        }
+
+        builder.setNegativeButton(android.R.string.cancel, null)
+
+        builder.create().show()
     }
 }
