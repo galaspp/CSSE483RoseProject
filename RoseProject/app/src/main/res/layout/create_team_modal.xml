@@ -55,7 +55,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:text="@string/team_members" />
-    
+
     
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"

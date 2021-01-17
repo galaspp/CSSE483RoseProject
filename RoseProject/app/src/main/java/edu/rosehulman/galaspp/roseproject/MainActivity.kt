@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
-            showCreateOrEditTeamModal()
+            showCreateProjectModal()
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
@@ -59,9 +59,30 @@ class MainActivity : AppCompatActivity() {
     private fun showCreateOrEditTeamModal()
     {
         val builder = AlertDialog.Builder(this)
+        //TODO: Change title based on whether editing or creating team
+        //TODO: Prepopulate items as needed
         builder.setTitle("Create Team?")
 
         val view = LayoutInflater.from(this).inflate(R.layout.create_team_modal, null, false)
+        builder.setView(view)
+
+        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+
+        }
+
+        builder.setNegativeButton(android.R.string.cancel, null)
+
+        builder.create().show()
+    }
+
+    private fun showCreateProjectModal()
+    {
+        val builder = AlertDialog.Builder(this)
+        //TODO: Change title based on whether editing or creating team
+        //TODO: Prepopulate items as needed
+        builder.setTitle("Create Project? (Admin Only)")
+
+        val view = LayoutInflater.from(this).inflate(R.layout.create_project_modal, null, false)
         builder.setView(view)
 
         builder.setPositiveButton(android.R.string.ok) { _, _ ->

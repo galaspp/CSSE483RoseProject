@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/projectNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/project_name" />
+
+    <EditText
+        android:id="@+id/edit_text_project_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_project_name"
+        android:ems="10"
+        android:inputType="text"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        />
+
+    <TextView
+        android:id="@+id/projectDescriptionTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/project_description" />
+
+
+    <EditText
+        android:id="@+id/edit_text_project_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_project_description"
+        android:ems="10"
+        android:inputType="text"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"/>
+
+</LinearLayout>
