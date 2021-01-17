@@ -25,4 +25,22 @@
     <string name="project_description">Project Description</string>
     <string name="enter_project_name">Enter Project Name</string>
     <string name="enter_project_description">Enter Project Description</string>
+    <string name="enter_task_name">Enter Task Name</string>
+    <string name="task_name">Task Name</string>
+    <string name="urgency">Urgency</string>
+    <string name="enter_urgency_1_10">Enter Urgency 1-10</string>
+    <string name="assign_task">Assign Task</string>
+    <string name="enter_username_input">Enter USername</string>
+    <string name="status">Status</string>
+    <string name="task_log">Task Log</string>
+    <string name="log_hours">Log Hours</string>
+    <string name="hrs"># hrs</string>
+    <string name="submit_time">Submit Time</string>
+
+    <string-array name="task_status_arrry">
+        <item>Not Started</item>
+        <item>Ongoing</item>
+        <item>Completed</item>
+        <item>Halted</item>
+    </string-array>
 </resources>

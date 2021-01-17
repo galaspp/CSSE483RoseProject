@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/taskNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/task_name" />
+
+    <EditText
+        android:id="@+id/edit_text_task_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_task_name"
+        android:ems="10"
+        android:inputType="text"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        />
+
+    <TextView
+        android:id="@+id/taskUrgencyTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/urgency" />
+
+
+    <EditText
+        android:id="@+id/edit_text_urgency_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_urgency_1_10"
+        android:ems="10"
+        android:inputType="number"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"/>
+
+    <TextView
+        android:id="@+id/taskAssignTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/assign_task" />
+
+
+    <EditText
+        android:id="@+id/edit_text_assign_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_username_input"
+        android:ems="10"
+        android:inputType="number"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"/>
+
+
+    <TextView
+        android:id="@+id/taskStatusTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/status" />
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"/>
+
+    <TextView
+        android:id="@+id/taskLogHoursTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/log_hours" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/edit_text_log_hours"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="@string/hrs"
+            android:ems="10"
+            android:inputType="number"
+            android:layout_marginBottom="20dp"
+            android:layout_marginStart="22dp"
+          />
+
+        <Button
+            android:id="@+id/submit_time_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="22dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="@color/rosered"
+            android:textColor="@color/white"
+            android:text="@string/submit_time" />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/taskLogTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/task_log" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/backgroundcolor"
+        />
+
+</LinearLayout>

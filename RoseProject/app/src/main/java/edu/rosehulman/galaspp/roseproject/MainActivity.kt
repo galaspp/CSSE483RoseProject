@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -16,6 +18,7 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import kotlinx.android.synthetic.main.create_edit_task_modal.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
-            showCreateProjectModal()
+            showCreateorEditTaskModal()
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
@@ -85,6 +88,30 @@ class MainActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.create_project_modal, null, false)
         builder.setView(view)
 
+        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+
+        }
+
+        builder.setNegativeButton(android.R.string.cancel, null)
+
+        builder.create().show()
+    }
+
+    private fun showCreateorEditTaskModal()
+    {
+        val builder = AlertDialog.Builder(this)
+        //TODO: Change title based on whether editing or creating team
+        //TODO: Prepopulate items as needed
+        builder.setTitle("Create Task?")
+
+        val view = LayoutInflater.from(this).inflate(R.layout.create_edit_task_modal, null, false)
+        builder.setView(view)
+
+        val spinner2: Spinner = findViewById(R.id.spinner)
+        var arrayVal = resources.getStringArray(R.array.task_status_arrry)
+        var aa = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayVal)
+        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner2.adapter = aa
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
 
         }
