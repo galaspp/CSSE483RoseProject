@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.home.HomeFragment"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/project_project_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Project Title"
+        android:textSize="40sp"
+        android:layout_marginBottom="20dp"
+        android:layout_centerHorizontal="true"/>
+
+    <LinearLayout
+        android:id="@+id/ongoing_layout_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/project_project_title">
+        <TextView
+            android:id="@+id/ongoing_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ongoing"
+            android:textSize="25sp"
+            />
+        <include
+            layout="@layout/ongoing_recycler_view"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/halted_layout_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/ongoing_layout_view">
+        <TextView
+            android:id="@+id/halted_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Halted"
+            android:textSize="25sp"
+            />
+        <include
+            layout="@+id/halted_recycler_view"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/completed_layout_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/halted_layout_view">
+        <TextView
+            android:id="@+id/completed_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Completed"
+            android:textSize="25sp"
+            />
+        <include
+            layout="@+id/completed_recycler_view"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/not_started_layout_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/completed_layout_view">
+        <TextView
+            android:id="@+id/not_started_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Not Started"
+            android:textSize="25sp"
+            />
+        <include
+            layout="@+id/not_started_recycler_view"/>
+    </LinearLayout>
+
+
+
+
+
+</RelativeLayout>
