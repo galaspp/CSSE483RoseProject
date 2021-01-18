@@ -47,4 +47,9 @@
         <item>Completed</item>
         <item>Halted</item>
     </string-array>
+
+    <string-array name="member_Permissions">
+        <item>Member</item>
+        <item>Admin/Owner</item>
+    </string-array>
 </resources>

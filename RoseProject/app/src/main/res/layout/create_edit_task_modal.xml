@@ -82,7 +82,9 @@
         android:id="@+id/spinner"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="22dp"/>
+        android:layout_marginStart="22dp"
+        android:layout_marginBottom="20dp"
+        />
 
     <TextView
         android:id="@+id/taskLogHoursTextView"
@@ -100,7 +102,7 @@
 
         <EditText
             android:id="@+id/edit_text_log_hours"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:hint="@string/hrs"
             android:ems="10"
@@ -112,10 +114,9 @@
         <Button
             android:id="@+id/submit_time_button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="22dp"
-            android:textSize="14sp"
-            android:textStyle="bold"
+            android:layout_height="34dp"
+            android:layout_marginStart="90dp"
+            android:textSize="10sp"
             android:background="@color/rosered"
             android:textColor="@color/white"
             android:text="@string/submit_time" />

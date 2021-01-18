@@ -18,7 +18,9 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.*
+import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
+            showAddRemoveModal()
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
@@ -106,11 +109,11 @@ class MainActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.create_edit_task_modal, null, false)
         builder.setView(view)
 
-        val spinner2: Spinner = findViewById(R.id.spinner)
         var arrayVal = resources.getStringArray(R.array.task_status_arrry)
         var aa = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayVal)
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner2.adapter = aa
+        view.spinner.adapter = aa
+
         builder.setPositiveButton("Save") { _, _ ->
 
         }
@@ -129,6 +132,11 @@ class MainActivity : AppCompatActivity() {
         builder.setView(view)
 
         //TODO: Add Spinner
+        val arrayVal = resources.getStringArray(R.array.member_Permissions)
+        val aa = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayVal)
+        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        view.userPermissionSpinner.adapter = aa
+
         builder.setPositiveButton(R.string.add) { _, _ ->
 
         }
