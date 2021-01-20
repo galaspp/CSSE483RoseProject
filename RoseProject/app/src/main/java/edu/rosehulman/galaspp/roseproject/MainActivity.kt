@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
 import android.widget.Spinner
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
@@ -22,12 +23,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
 import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
+import kotlinx.android.synthetic.main.create_team_modal.*
+import kotlinx.android.synthetic.main.create_team_modal.view.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,7 +45,6 @@ class MainActivity : AppCompatActivity() {
 
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
-            showAddRemoveModal()
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
@@ -54,6 +57,10 @@ class MainActivity : AppCompatActivity() {
         drawerToggle.syncState()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         //Navigation Drawer End
+
+        create_new_team_button.setOnClickListener{
+            showCreateOrEditTeamModal()
+        }
 
         openFragment(WelcomeFragment())
     }
@@ -90,18 +97,31 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun showCreateOrEditTeamModal()
+    private fun showCreateOrEditTeamModal(position: Int = -1)
     {
         val builder = AlertDialog.Builder(this)
         //TODO: Change title based on whether editing or creating team
         //TODO: Prepopulate items as needed
-        builder.setTitle("Create Team?")
+        if(position != -1) {
+            builder.setTitle("Edit Team?")
+        }
+        else {
+            builder.setTitle("Create Team?")
+        }
 
         val view = LayoutInflater.from(this).inflate(R.layout.create_team_modal, null, false)
         builder.setView(view)
 
-        builder.setPositiveButton("Save") { _, _ ->
+        //TODO: Add Recycler View Layout
+        //Maybe add to a different file
+        //val recyclerView = LayoutInflater.from(view.context).inflate(create_edit_team_recycler_view, null, false)
 
+        view.create_team_add_members_modal.setOnClickListener{
+            showAddRemoveMemberModal()
+        }
+
+        builder.setPositiveButton("Save") { _, _ ->
+            //TODO: Create or Update Team Here
         }
 
         builder.setNegativeButton(android.R.string.cancel, null)
@@ -152,7 +172,7 @@ class MainActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-    private fun showAddRemoveModal()
+    private fun showAddRemoveMemberModal()
     {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Add/Remove Member")
@@ -162,14 +182,13 @@ class MainActivity : AppCompatActivity() {
 
         //TODO: Add Spinner
         val arrayVal = resources.getStringArray(R.array.member_Permissions)
-        val aa = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayVal)
+        val aa = ArrayAdapter(view.context, android.R.layout.simple_spinner_item, arrayVal)
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         view.userPermissionSpinner.adapter = aa
 
         builder.setPositiveButton(R.string.add) { _, _ ->
 
         }
-
 
         builder.setNeutralButton(android.R.string.cancel, null)
 
