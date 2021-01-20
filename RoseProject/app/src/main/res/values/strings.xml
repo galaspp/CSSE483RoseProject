@@ -41,6 +41,9 @@
     <string name="remove">Remove</string>
     <string name="add">Add</string>
 
+    <string name="open">open</string>
+    <string name="close">close</string>
+
     <string-array name="task_status_arrry">
         <item>Not Started</item>
         <item>Ongoing</item>

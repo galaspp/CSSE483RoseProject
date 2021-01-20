@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -19,9 +20,11 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
 import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileFragment
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
@@ -42,15 +45,15 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
-        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
-        val navView: NavigationView = findViewById(R.id.nav_view)
-        val navController = findNavController(R.id.nav_host_fragment)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        appBarConfiguration = AppBarConfiguration(setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow), drawerLayout)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+
+        //Navigation Drawer Start
+        //https://www.droidcon.com/news-detail?content-id=/repository/collaboration/Groups/spaces/droidcon_hq/Documents/public/news/android-news/Android%20Material%20Component!%20An%20easy%20approach%20to%20Navigation%20Drawer%20(Part%20I)
+        setSupportActionBar(toolbar)
+        val drawerToggle = ActionBarDrawerToggle(this, drawer_layout, R.string.open, R.string.close)
+        drawer_layout.addDrawerListener(drawerToggle)
+        drawerToggle.syncState()
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        //Navigation Drawer End
 
         openFragment(WelcomeFragment())
     }
@@ -63,6 +66,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            android.R.id.home -> {
+                drawer_layout.openDrawer(GravityCompat.START)
+                true
+            }
             R.id.action_profile -> {
                 openFragment(ProfileFragment())
                 true
