@@ -22,4 +22,9 @@ class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateE
     override fun getItemCount(): Int {
         return listofusernames.size
     }
+
+    fun addName(name: String)
+    {
+        listofusernames.add(name)
+    }
 }

@@ -24,6 +24,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import edu.rosehulman.galaspp.roseproject.ui.CreateEditTeamAdapter
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
 import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileFragment
 import kotlinx.android.synthetic.main.activity_main.*
@@ -114,8 +115,26 @@ class MainActivity : AppCompatActivity() {
 
         //TODO: Add Recycler View Layout
         //Maybe add to a different file
-        //val recyclerView = LayoutInflater.from(view.context).inflate(create_edit_team_recycler_view, null, false)
+        val recyclerView = view.create_edit_team_recycler_view
+        val adapter = CreateEditTeamAdapter(this)
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.setHasFixedSize(true)
 
+//        adapter.addName("Yeet")
+//        adapter.addName("Yeet2")
+//        adapter.addName("Yeet3")
+//        adapter.addName("Yeet4")
+//        adapter.addName("Yeet5")
+//        adapter.addName("Yeet6")
+//        adapter.addName("Yeet7")
+//        adapter.addName("Yeet1")
+//        adapter.addName("Yeet21")
+//        adapter.addName("Yeet31")
+//        adapter.addName("Yeet41")
+//        adapter.addName("Yeet51")
+//        adapter.addName("Yeet61")
+//        adapter.addName("Yeet71")
         view.create_team_add_members_modal.setOnClickListener{
             showAddRemoveMemberModal()
         }

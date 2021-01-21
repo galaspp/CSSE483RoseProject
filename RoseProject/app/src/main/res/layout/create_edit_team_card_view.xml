@@ -2,14 +2,15 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:background="@color/backgroundcolor">
 
     <TextView
         android:id="@+id/create_edit_team_card_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:textSize="14sp"
+        android:textColor="@color/black"
+        android:textSize="20sp"
         />
 
 </androidx.cardview.widget.CardView>
