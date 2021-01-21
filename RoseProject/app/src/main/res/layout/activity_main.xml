@@ -37,7 +37,21 @@
 
         </androidx.appcompat.widget.Toolbar>
 
-<!--        <androidx.recyclerview.widget.RecyclerView-->
+        <Button
+            android:id="@+id/create_new_team_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:text="@string/create_new_team" />
+
+
+        <!--        <androidx.recyclerview.widget.RecyclerView-->
 <!--            android:layout_width="match_parent"-->
 <!--            android:layout_height="match_parent"-->
 <!--            android:id="@+id/recycler_view_nav_drawer"/>-->
