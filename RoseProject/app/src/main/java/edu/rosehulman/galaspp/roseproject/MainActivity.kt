@@ -17,10 +17,16 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import edu.rosehulman.galaspp.roseproject.ui.CustomExpandableListAdapter
+import edu.rosehulman.galaspp.roseproject.ui.ExpandableListDataPump
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.CreateEditTeamAdapter
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
+import edu.rosehulman.galaspp.roseproject.ui.createeditteam.NavDrawerAdapter
+import edu.rosehulman.galaspp.roseproject.ui.createeditteam.TeamObject
 import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileFragment
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
 import kotlinx.android.synthetic.main.create_team_modal.view.*
@@ -49,16 +55,17 @@ class MainActivity : AppCompatActivity() {
         drawerToggle.syncState()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-//        val drawerRecyclerView = recycler_view_nav_drawer
-//        val adapter = CreateEditTeamAdapter(this) //TODO: Change this
-//        drawerRecyclerView.adapter = adapter
-//        drawerRecyclerView.layoutManager = LinearLayoutManager(this)
-//        drawerRecyclerView.setHasFixedSize(true)
-        //Navigation Drawer End
+
+        val drawerRecyclerView = nav_view.recycler_view_nav_drawer
+        val adapter = NavDrawerAdapter(nav_view.context)
+        drawerRecyclerView.adapter = adapter
+        drawerRecyclerView.layoutManager = LinearLayoutManager(this)
+        drawerRecyclerView.setHasFixedSize(true)
 
         create_new_team_button.setOnClickListener{
-            showCreateOrEditTeamModal()
+            showCreateOrEditTeamModal(-1, adapter)
         }
+        //Navigation Drawer End
 
         openFragment(WelcomeFragment())
     }
@@ -95,7 +102,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun showCreateOrEditTeamModal(position: Int = -1)
+    private fun showCreateOrEditTeamModal(position: Int = -1, adapterNav: NavDrawerAdapter)
     {
         val builder = AlertDialog.Builder(this)
         //TODO: Change title based on whether editing or creating team
@@ -131,7 +138,7 @@ class MainActivity : AppCompatActivity() {
 //        adapter.addName("Yeet41")
 //        adapter.addName("Yeet51")
 //        adapter.addName("Yeet61")
-//        adapter.addName("Yeet71")//
+//        adapter.addName("Yeet71")
 
         view.create_team_add_members_modal.setOnClickListener{
             showAddRemoveMemberModal(adapter)
@@ -139,6 +146,7 @@ class MainActivity : AppCompatActivity() {
 
         builder.setPositiveButton("Save") { _, _ ->
             //TODO: Create or Update Team Here
+            adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString()))
         }
 
         builder.setNegativeButton(android.R.string.cancel, null)

@@ -17,8 +17,6 @@ class CustomExpandableListAdapter(
         var expandableListDetail: HashMap<String, List<String>>? = null
 ): BaseExpandableListAdapter() {
 
-
-
     fun CustomExpandableListAdapter(context: Context?, expandableListTitle: List<String>?,
                                     expandableListDetail: HashMap<String, List<String>>?) {
         this.context = context

@@ -24,7 +24,7 @@
         >
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbar2"
             android:minHeight="?attr/actionBarSize"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,10 +32,18 @@
             app:titleTextColor="@android:color/white"
             android:background="@color/white">
 
-            <include
-                layout="@layout/drawer_recycler_view"/>
+<!--            <include-->
+<!--                layout="@layout/drawer_recycler_view"/>-->
 
         </androidx.appcompat.widget.Toolbar>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_nav_drawer"
+            android:layout_width="match_parent"
+            android:layout_height="500dp"
+            android:layout_marginTop="60dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            />
 
         <Button
             android:id="@+id/create_new_team_button"
