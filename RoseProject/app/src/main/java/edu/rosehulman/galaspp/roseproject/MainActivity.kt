@@ -48,6 +48,12 @@ class MainActivity : AppCompatActivity() {
         drawer_layout.addDrawerListener(drawerToggle)
         drawerToggle.syncState()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+//        val drawerRecyclerView = recycler_view_nav_drawer
+//        val adapter = CreateEditTeamAdapter(this) //TODO: Change this
+//        drawerRecyclerView.adapter = adapter
+//        drawerRecyclerView.layoutManager = LinearLayoutManager(this)
+//        drawerRecyclerView.setHasFixedSize(true)
         //Navigation Drawer End
 
         create_new_team_button.setOnClickListener{

@@ -24,7 +24,7 @@ class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateE
 
     fun addName(name: String, permissions: String)
     {
-        listofusernames.add(MemberObject(name, permissions))
+        listofusernames.add(0, MemberObject(name, permissions))
         notifyItemInserted(0)
     }
 
