@@ -131,7 +131,7 @@ class MainActivity : AppCompatActivity() {
 //        adapter.addName("Yeet41")
 //        adapter.addName("Yeet51")
 //        adapter.addName("Yeet61")
-//        adapter.addName("Yeet71")
+//        adapter.addName("Yeet71")//
 
         view.create_team_add_members_modal.setOnClickListener{
             showAddRemoveMemberModal(adapter)
