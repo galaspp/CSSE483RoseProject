@@ -5,8 +5,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.ExpandableListView
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -22,12 +25,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
+import edu.rosehulman.galaspp.roseproject.ui.CustomExpandableListAdapter
+import edu.rosehulman.galaspp.roseproject.ui.ExpandableListDataPump
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
 import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
+import kotlinx.android.synthetic.main.drawer_row_view.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -67,6 +73,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
+                populateMenu()
                 drawer_layout.openDrawer(GravityCompat.START)
                 true
             }
@@ -75,6 +82,42 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun populateMenu(){
+        val expandableListView : ExpandableListView = findViewById(R.id.expandableListView)
+        val expandableListDetail = ExpandableListDataPump.getData()
+        val expandableListTitle = ArrayList<String>(expandableListDetail!!.keys)
+        val expandableListAdapter = CustomExpandableListAdapter(this, expandableListTitle, expandableListDetail)
+        expandableListView.setAdapter(expandableListAdapter)
+        expandableListView.setOnGroupExpandListener{
+            fun onGroupExpand(groupPosition : Int) {
+                Toast.makeText(applicationContext,
+                        expandableListTitle.get(groupPosition) + " List Expanded.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        expandableListView.setOnGroupCollapseListener{
+            fun onGroupCollapse(groupPosition: Int) {
+                Toast.makeText(applicationContext,
+                        expandableListTitle.get(groupPosition) + " List Collapsed.",
+                        Toast.LENGTH_SHORT).show()
+
+            }
+        }
+
+        expandableListView.setOnChildClickListener{ expandableListView: ExpandableListView, v: View,
+                groupPosition: Int, childPosition: Int, id: Long ->
+                Toast.makeText(
+                        applicationContext,
+                        expandableListTitle.get(groupPosition)
+                                + " -> "
+                                + expandableListDetail.get(
+                                expandableListTitle.get(groupPosition))!![childPosition], Toast.LENGTH_SHORT
+                ).show()
+                false
         }
     }
 
