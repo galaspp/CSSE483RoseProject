@@ -1,14 +1,13 @@
-package edu.rosehulman.galaspp.roseproject.ui
+package edu.rosehulman.galaspp.roseproject.ui.createeditteam
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.R
-import edu.rosehulman.galaspp.roseproject.ui.profile.CreateEditTeamHolder
 
 class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateEditTeamHolder>() {
-    private var listofusernames : ArrayList<String> = ArrayList()
+    private var listofusernames : ArrayList<MemberObject> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CreateEditTeamHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.create_edit_team_card_view, parent, false)
@@ -23,8 +22,20 @@ class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateE
         return listofusernames.size
     }
 
-    fun addName(name: String)
+    fun addName(name: String, permissions: String)
     {
-        listofusernames.add(name)
+        listofusernames.add(MemberObject(name, permissions))
+        notifyItemInserted(0)
+    }
+
+    fun removeName(name: String)
+    {
+        for(i in 0..listofusernames.size) {
+            if(listofusernames.get(i).userName == name) {
+                listofusernames.removeAt(i)
+                notifyItemChanged(i)
+                break
+            }
+        }
     }
 }

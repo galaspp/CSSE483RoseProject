@@ -1,37 +1,28 @@
 package edu.rosehulman.galaspp.roseproject
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
-import android.widget.LinearLayout
-import android.widget.Spinner
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import edu.rosehulman.galaspp.roseproject.ui.CreateEditTeamAdapter
+import edu.rosehulman.galaspp.roseproject.ui.createeditteam.CreateEditTeamAdapter
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
 import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
-import kotlinx.android.synthetic.main.create_edit_task_modal.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
-import kotlinx.android.synthetic.main.create_team_modal.*
 import kotlinx.android.synthetic.main.create_team_modal.view.*
 
 class MainActivity : AppCompatActivity() {
@@ -135,8 +126,9 @@ class MainActivity : AppCompatActivity() {
 //        adapter.addName("Yeet51")
 //        adapter.addName("Yeet61")
 //        adapter.addName("Yeet71")
+
         view.create_team_add_members_modal.setOnClickListener{
-            showAddRemoveMemberModal()
+            showAddRemoveMemberModal(adapter)
         }
 
         builder.setPositiveButton("Save") { _, _ ->
@@ -151,7 +143,7 @@ class MainActivity : AppCompatActivity() {
     private fun showCreateProjectModal()
     {
         val builder = AlertDialog.Builder(this)
-        //TODO: Change title based on whether editing or creating team
+        //TODO: Change title based on whether editing or creating Project
         //TODO: Prepopulate items as needed
         builder.setTitle("Create Project? (Admin Only)")
 
@@ -191,7 +183,7 @@ class MainActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-    private fun showAddRemoveMemberModal()
+    private fun showAddRemoveMemberModal(adapter: CreateEditTeamAdapter)
     {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Add/Remove Member")
@@ -206,13 +198,13 @@ class MainActivity : AppCompatActivity() {
         view.userPermissionSpinner.adapter = aa
 
         builder.setPositiveButton(R.string.add) { _, _ ->
-
+            adapter.addName(view.edit_text_member_username.text.toString(), view.userPermissionSpinner.selectedItem.toString())
         }
 
         builder.setNeutralButton(android.R.string.cancel, null)
 
         builder.setNegativeButton("Remove") { _, _ ->
-
+            adapter.removeName(view.edit_text_member_username.text.toString())
         }
         builder.create().show()
     }
