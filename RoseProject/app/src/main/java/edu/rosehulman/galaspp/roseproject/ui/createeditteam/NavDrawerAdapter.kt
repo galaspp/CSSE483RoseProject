@@ -28,4 +28,8 @@ class NavDrawerAdapter (var context: Context) : RecyclerView.Adapter<NavDrawerHo
         notifyItemInserted(0)
     }
 
+    interface OnNavDrawerListener {
+        fun onEditTeamItemSelected()
+    }
+
 }
