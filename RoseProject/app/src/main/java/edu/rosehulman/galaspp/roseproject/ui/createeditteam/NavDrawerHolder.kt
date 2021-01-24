@@ -21,17 +21,16 @@ class NavDrawerHolder: RecyclerView.ViewHolder {
         val dropDownMenu = PopupMenu(itemView.context, itemView.card_options_button)
         val menu = dropDownMenu.menu
         menu.add(0, 0, 0, "Create Project")
-        menu.add(0, 0, 0, "Edit Team")
+        menu.add(0, 1, 0, "Edit Team")
         dropDownMenu.menuInflater.inflate(R.menu.team_menu_options, menu)
 
         dropDownMenu.setOnMenuItemClickListener {
              when (it.itemId) {
                 0 -> {
-                    
                     true
                 }
                 1-> {
-
+                    adapter.editTeamClicked(adapterPosition)
                     true
                 }
                 else -> false

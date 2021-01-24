@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.R
 
-class NavDrawerAdapter (var context: Context) : RecyclerView.Adapter<NavDrawerHolder>() {
+class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener) : RecyclerView.Adapter<NavDrawerHolder>() {
     private var allTeams : ArrayList<TeamObject> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NavDrawerHolder {
@@ -28,8 +28,27 @@ class NavDrawerAdapter (var context: Context) : RecyclerView.Adapter<NavDrawerHo
         notifyItemInserted(0)
     }
 
+    fun editTeamClicked(adapterPosition: Int)
+    {
+        listener.onEditTeamItemSelected(adapterPosition, this)
+    }
+
+    fun getTeamDetails(position: Int): TeamObject
+    {
+        return allTeams[position]
+    }
+
+    fun editTeamAtPosition(position: Int, teamName: String, teamDescription: String, members: ArrayList<MemberObject>)
+    {
+        allTeams[position].teamName = teamName
+        allTeams[position].teamDescription = teamDescription
+        allTeams[position].members = members
+
+        notifyItemChanged(position)
+    }
+
     interface OnNavDrawerListener {
-        fun onEditTeamItemSelected()
+        fun onEditTeamItemSelected(position: Int, adapter: NavDrawerAdapter)
     }
 
 }

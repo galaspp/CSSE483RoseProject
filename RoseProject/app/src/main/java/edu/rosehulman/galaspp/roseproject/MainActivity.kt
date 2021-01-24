@@ -31,7 +31,7 @@ import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
 import kotlinx.android.synthetic.main.create_team_modal.view.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
 
 
         val drawerRecyclerView = nav_view.recycler_view_nav_drawer
-        val adapter = NavDrawerAdapter(nav_view.context)
+        val adapter = NavDrawerAdapter(nav_view.context, this)
         drawerRecyclerView.adapter = adapter
         drawerRecyclerView.layoutManager = LinearLayoutManager(this)
         drawerRecyclerView.setHasFixedSize(true)
@@ -101,6 +101,10 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
+    override fun onEditTeamItemSelected(position: Int, adapter: NavDrawerAdapter) {
+        showCreateOrEditTeamModal(position, adapter)
+    }
+
 
     private fun showCreateOrEditTeamModal(position: Int = -1, adapterNav: NavDrawerAdapter)
     {
@@ -125,28 +129,35 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
 
-//        adapter.addName("Yeet")
-//        adapter.addName("Yeet2")
-//        adapter.addName("Yeet3")
-//        adapter.addName("Yeet4")
-//        adapter.addName("Yeet5")
-//        adapter.addName("Yeet6")
-//        adapter.addName("Yeet7")
-//        adapter.addName("Yeet1")
-//        adapter.addName("Yeet21")
-//        adapter.addName("Yeet31")
-//        adapter.addName("Yeet41")
-//        adapter.addName("Yeet51")
-//        adapter.addName("Yeet61")
-//        adapter.addName("Yeet71")
-
         view.create_team_add_members_modal.setOnClickListener{
             showAddRemoveMemberModal(adapter)
         }
 
+        if(position != -1)
+        {
+            view.edit_text_team_name.setText(adapterNav.getTeamDetails(position).teamName)
+            view.edit_text_team_description.setText(adapterNav.getTeamDetails(position).teamDescription)
+            adapter.setListOfMembers(adapterNav.getTeamDetails(position).members)
+        }
+
         builder.setPositiveButton("Save") { _, _ ->
             //TODO: Create or Update Team Here
-            adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString()))
+            if(position == -1)
+            {
+                adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString(),
+                    view.edit_text_team_description.text.toString(),
+                    adapter.getListOfMembers()
+                        ))
+            }
+            else
+            {
+                adapterNav.editTeamAtPosition(position,
+                        view.edit_text_team_name.text.toString(),
+                        view.edit_text_team_description.text.toString(),
+                        adapter.getListOfMembers()
+                )
+            }
+
         }
 
         builder.setNegativeButton(android.R.string.cancel, null)

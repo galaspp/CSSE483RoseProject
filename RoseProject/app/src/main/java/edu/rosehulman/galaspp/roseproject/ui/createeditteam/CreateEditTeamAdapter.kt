@@ -28,6 +28,15 @@ class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateE
         notifyItemInserted(0)
     }
 
+    fun getListOfMembers(): ArrayList<MemberObject> {
+        return listofusernames
+    }
+
+    fun setListOfMembers(list: ArrayList<MemberObject>) {
+        listofusernames = list
+        notifyDataSetChanged()
+    }
+
     fun removeName(name: String)
     {
         for(i in 0..listofusernames.size) {
