@@ -9,8 +9,8 @@ import android.widget.BaseExpandableListAdapter
 import android.widget.LinearLayout
 import android.widget.TextView
 import edu.rosehulman.galaspp.roseproject.R
-
-
+//Resource
+//https://www.androidhive.info/2013/07/android-expandable-list-view-tutorial/
 class CustomExpandableListAdapter(
         var context: Context? = null,
         var expandableListTitle: List<String>? = null,
@@ -43,7 +43,7 @@ class CustomExpandableListAdapter(
             convertView = layoutInflater.inflate(R.layout.list_item, null)
         }
         val expandedListTextView = convertView!!
-                .findViewById(R.id.expanded_list_item) as TextView
+                .findViewById(R.id.lblListItem) as TextView
         expandedListTextView.text = expandedListText
         return convertView
     }
@@ -74,7 +74,7 @@ class CustomExpandableListAdapter(
             convertView = layoutInflater.inflate(R.layout.list_group, null)
         }
         val listTitleTextView = convertView!!
-                .findViewById(R.id.listTitle) as TextView
+                .findViewById(R.id.lblListHeader) as TextView
         listTitleTextView.setTypeface(null, Typeface.BOLD)
         listTitleTextView.text = listTitle
         return convertView

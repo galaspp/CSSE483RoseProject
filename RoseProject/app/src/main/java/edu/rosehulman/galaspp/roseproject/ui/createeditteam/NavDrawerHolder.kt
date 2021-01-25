@@ -1,24 +1,28 @@
 package edu.rosehulman.galaspp.roseproject.ui.createeditteam
 
+import android.content.Context
+import android.os.Build
+import android.util.Log
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
-import android.widget.ImageButton
+import android.widget.ExpandableListView
 import android.widget.PopupMenu
-import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.annotation.RequiresApi
+import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.R
-import edu.rosehulman.galaspp.roseproject.ui.project.ProjectAdapter
+import edu.rosehulman.galaspp.roseproject.ui.CustomExpandableListAdapter
 import kotlinx.android.synthetic.main.drawer_card_view.view.*
 
-class NavDrawerHolder(itemView: View, adapter: NavDrawerAdapter) : RecyclerView.ViewHolder(itemView) {
-    val textView: TextView = itemView.drawer_card_view_text_view
-    val imageButton: ImageButton = itemView.drop_down_button
-    val recyclerViewItem: RecyclerView = itemView.drawer_item_recycler_view
-    var projectAdapter: ProjectAdapter = ProjectAdapter(itemView.context)
+
+class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDrawerAdapter) : RecyclerView.ViewHolder(itemView) {
     var view: View = itemView
-    var buttonDropdownState: Int = 0
+    lateinit var listAdapter: CustomExpandableListAdapter
+    lateinit var expListView: ExpandableListView
+    var listDataHeader: List<String>? = null
+    var listDataChild: HashMap<String, List<String>>? = null
+    private val DEFAULT_HEIGHT = 92
 
     init {
         val dropDownMenu = PopupMenu(itemView.context, itemView.card_options_button)
@@ -27,12 +31,12 @@ class NavDrawerHolder(itemView: View, adapter: NavDrawerAdapter) : RecyclerView.
         menu.add(0, 1, 0, "Edit Team")
         dropDownMenu.menuInflater.inflate(R.menu.team_menu_options, menu)
         dropDownMenu.setOnMenuItemClickListener {
-             when (it.itemId) {
+            when (it.itemId) {
                 0 -> {
-                    projectAdapter.showCreateProjectModal()
+                    adapter.showCreateProjectModal(adapterPosition)
                     true
                 }
-                1-> {
+                1 -> {
                     adapter.editTeamClicked(adapterPosition)
                     true
                 }
@@ -40,29 +44,49 @@ class NavDrawerHolder(itemView: View, adapter: NavDrawerAdapter) : RecyclerView.
             }
         }
         itemView.card_options_button.setOnClickListener {
-           dropDownMenu.show()
+            dropDownMenu.show()
         }
-        imageButton.setOnClickListener {
-            if(buttonDropdownState == 0)
-            {
-                recyclerViewItem.visibility = VISIBLE
-                imageButton.setImageResource(R.drawable.ic_arrow_down_24)
-                buttonDropdownState = 1
-            }
-            else
-            {
-                recyclerViewItem.visibility = GONE
-                imageButton.setImageResource(R.drawable.ic_baseline_navigate_next_24)
-                buttonDropdownState = 0
-            }
-        }
-        recyclerViewItem.adapter = projectAdapter
-        recyclerViewItem.layoutManager = LinearLayoutManager(itemView.context)
-        recyclerViewItem.setHasFixedSize(true)
     }
 
-    fun bind(team: TeamObject)
-    {
-        textView.text = team.teamName
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun bind(team: TeamObject){
+        expListView = view.findViewById(R.id.expandable_list_view) as ExpandableListView
+
+        // preparing list data
+        listDataHeader = ArrayList()
+        (listDataHeader as ArrayList<String>).add("       " + team.teamName)
+
+        listDataChild = HashMap()
+        val projectNames: MutableList<String> = ArrayList()
+        for(p in adapter.projects[team.teamName]!!){
+            projectNames.add(p.projectTitle)
+        }
+
+        listDataChild!![(listDataHeader as ArrayList<String>)[0]] = projectNames// Header, Child data
+
+        for(k in listDataChild!!.keys){
+            Log.d("test", "${listDataChild!![k]}\n len${adapter.projects[team.teamName]?.size}")
+        }
+        //Set list adapter
+        listAdapter = CustomExpandableListAdapter(context, listDataHeader, listDataChild)
+        expListView.setAdapter(listAdapter)
+        expListView.bottomEdgeEffectColor = ContextCompat.getColor(context, R.color.white)
+
+        //Adjust size based on # of projects in view and if group is expanded
+        val card : CardView = view.drawer_card_view
+        val numProjects = adapter.projects[team.teamName]?.size
+        //Add on click listeners to adjust size
+        expListView.setOnGroupExpandListener {
+            Log.d("test", "You expanded the thing!")
+            card.layoutParams.height = DEFAULT_HEIGHT +
+                    expListView[0].height * numProjects!!
+            Log.d("test", "${expListView.height}}")
+        }
+        expListView.setOnGroupCollapseListener {
+            Log.d("test", "You collapsed the thing!")
+            card.layoutParams.height = DEFAULT_HEIGHT
+        }
+
     }
+
 }
