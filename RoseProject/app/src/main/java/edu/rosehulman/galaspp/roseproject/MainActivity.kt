@@ -1,6 +1,7 @@
 package edu.rosehulman.galaspp.roseproject
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -15,6 +16,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +27,7 @@ import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.NavDrawerAdapter
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.TeamObject
 import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileFragment
+import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
@@ -33,7 +36,8 @@ import kotlinx.android.synthetic.main.create_team_modal.view.*
 
 class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
+//    private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var fab: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +45,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val fab: FloatingActionButton = findViewById(R.id.fab)
+        fab = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
@@ -67,7 +71,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener {
         }
         //Navigation Drawer End
 
-        openFragment(WelcomeFragment())
+        openFragment(WelcomeFragment(fab))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -83,23 +87,34 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener {
                 true
             }
             R.id.action_profile -> {
-                openFragment(ProfileFragment())
+                fab.hide()
+                openProfile(ProfileModel())
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    private fun openProfile(profile: ProfileModel){
+        val profileFragment = ProfileFragment.newInstance(profile)
+        val ft = supportFragmentManager.beginTransaction()
+        ft.replace(R.id.fragment_container, profileFragment)
+        ft.addToBackStack("profile")
+        ft.commit()
+
+    }
+
     private fun openFragment(fragment: Fragment){
         val ft = supportFragmentManager.beginTransaction()
         ft.replace(R.id.fragment_container, fragment)
+//        ft.addToBackStack("welcome")
         ft.commit()
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
-    }
+//    override fun onSupportNavigateUp(): Boolean {
+//        val navController = findNavController(R.id.nav_host_fragment)
+//        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+//    }
 
     override fun onEditTeamItemSelected(position: Int, adapter: NavDrawerAdapter) {
         showCreateOrEditTeamModal(position, adapter)

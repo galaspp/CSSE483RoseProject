@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="rosered">#800000</color>
     <color name="backgroundcolor">#CACACA</color>
+    <color name="diabledButtoncolor">#999</color>
 </resources>
