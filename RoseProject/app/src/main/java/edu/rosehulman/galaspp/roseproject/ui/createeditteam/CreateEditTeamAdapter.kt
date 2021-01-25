@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.R
+import edu.rosehulman.galaspp.roseproject.ui.project.ProjectObject
 
 class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateEditTeamHolder>() {
     private var listofusernames : ArrayList<MemberObject> = ArrayList()

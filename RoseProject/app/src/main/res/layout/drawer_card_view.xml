@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        android:src="@drawable/ic_arrow_down_24"
+        android:src="@drawable/ic_baseline_navigate_next_24"
         />
 
     <TextView
@@ -30,6 +30,15 @@
         android:background="@color/white"
         android:src="@drawable/ic_baseline_more_vert_24"
         android:layout_gravity="end"
+        />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/drawer_item_recycler_view"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="30dp"
+        android:visibility="visible"
         />
     
 
