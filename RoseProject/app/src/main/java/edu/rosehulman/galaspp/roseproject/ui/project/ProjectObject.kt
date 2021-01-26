@@ -1,4 +1,7 @@
 package edu.rosehulman.galaspp.roseproject.ui.project
 
-data class ProjectObject(var projectTitle: String = "", var projectDescription: String = "") {
-}
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
+data class ProjectObject(var projectTitle: String = "", var projectDescription: String = ""): Parcelable

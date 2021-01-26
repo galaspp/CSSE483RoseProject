@@ -11,9 +11,12 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
+import edu.rosehulman.galaspp.roseproject.FragmentListener
 import edu.rosehulman.galaspp.roseproject.R
 import edu.rosehulman.galaspp.roseproject.ui.CustomExpandableListAdapter
+import edu.rosehulman.galaspp.roseproject.ui.project.ProjectFragment
 import kotlinx.android.synthetic.main.drawer_card_view.view.*
+
 
 
 class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDrawerAdapter) : RecyclerView.ViewHolder(itemView) {
@@ -51,7 +54,6 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
     @RequiresApi(Build.VERSION_CODES.Q)
     fun bind(team: TeamObject){
         expListView = view.findViewById(R.id.expandable_list_view) as ExpandableListView
-
         // preparing list data
         listDataHeader = ArrayList()
         (listDataHeader as ArrayList<String>).add("       " + team.teamName)
@@ -64,9 +66,6 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
 
         listDataChild!![(listDataHeader as ArrayList<String>)[0]] = projectNames// Header, Child data
 
-        for(k in listDataChild!!.keys){
-            Log.d("test", "${listDataChild!![k]}\n len${adapter.projects[team.teamName]?.size}")
-        }
         //Set list adapter
         listAdapter = CustomExpandableListAdapter(context, listDataHeader, listDataChild)
         expListView.setAdapter(listAdapter)
@@ -77,16 +76,23 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         val numProjects = adapter.projects[team.teamName]?.size
         //Add on click listeners to adjust size
         expListView.setOnGroupExpandListener {
-            Log.d("test", "You expanded the thing!")
+//            Log.d("test", "You expanded the thing!")
             card.layoutParams.height = DEFAULT_HEIGHT +
                     expListView[0].height * numProjects!!
-            Log.d("test", "${expListView.height}}")
         }
         expListView.setOnGroupCollapseListener {
-            Log.d("test", "You collapsed the thing!")
+//            Log.d("test", "You collapsed the thing!")
             card.layoutParams.height = DEFAULT_HEIGHT
         }
 
+        expListView.setOnChildClickListener { parent, v, groupPosition, childPosition, id ->
+            val childName = listAdapter.getChild(groupPosition, childPosition).toString()
+            Log.d("test", "You clicked on project $childName!")
+            val project = adapter.projects[team.teamName]!![childPosition]
+            val projectName = adapter.projects[team.teamName]!![childPosition].projectTitle
+            (context as FragmentListener)
+                .openFragment(ProjectFragment.newInstance(project), true, projectName)
+            false
+        }
     }
-
 }

@@ -1,27 +1,26 @@
 package edu.rosehulman.galaspp.roseproject
 
 import android.os.Bundle
+import android.renderscript.Script
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import edu.rosehulman.galaspp.roseproject.ui.CustomExpandableListAdapter
-import edu.rosehulman.galaspp.roseproject.ui.ExpandableListDataPump
+import edu.rosehulman.galaspp.roseproject.ui.LaunchFragment
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.CreateEditTeamAdapter
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.NavDrawerAdapter
@@ -31,13 +30,15 @@ import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
+import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
 import kotlinx.android.synthetic.main.create_team_modal.view.*
 
-class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener {
+class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener, FragmentListener {
 
 //    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var fab: FloatingActionButton
+
+    override lateinit var fab: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,8 +71,9 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener {
             showCreateOrEditTeamModal(-1, adapter)
         }
         //Navigation Drawer End
-
-        openFragment(WelcomeFragment(fab))
+        app_bar_view.isVisible = false
+        fab.hide()
+        openFragment(LaunchFragment(app_bar_view), false, "sign_in")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -95,26 +97,25 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener {
         }
     }
 
+    //adds one profile to backstack
     private fun openProfile(profile: ProfileModel){
-        val profileFragment = ProfileFragment.newInstance(profile)
-        val ft = supportFragmentManager.beginTransaction()
-        ft.replace(R.id.fragment_container, profileFragment)
-        ft.addToBackStack("profile")
-        ft.commit()
-
+        //Prevent multiple profiles being added to backstack
+        if(supportFragmentManager.backStackEntryCount == 0){
+            val profileFragment = ProfileFragment.newInstance(profile)
+            val ft = supportFragmentManager.beginTransaction()
+            ft.replace(R.id.fragment_container, profileFragment)
+            ft.addToBackStack("profile")
+            ft.commit()
+        }
     }
 
-    private fun openFragment(fragment: Fragment){
+    override fun openFragment(fragment: Fragment, addToBackStack: Boolean, name: String){
+        drawer_layout.closeDrawer(GravityCompat.START)
         val ft = supportFragmentManager.beginTransaction()
         ft.replace(R.id.fragment_container, fragment)
-//        ft.addToBackStack("welcome")
+        if(addToBackStack) ft.addToBackStack(name)
         ft.commit()
     }
-
-//    override fun onSupportNavigateUp(): Boolean {
-//        val navController = findNavController(R.id.nav_host_fragment)
-//        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
-//    }
 
     override fun onEditTeamItemSelected(position: Int, adapter: NavDrawerAdapter) {
         showCreateOrEditTeamModal(position, adapter)
@@ -210,7 +211,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener {
         val view = LayoutInflater.from(this).inflate(R.layout.create_edit_task_modal, null, false)
         builder.setView(view)
 
-        var arrayVal = resources.getStringArray(R.array.task_status_arrry)
+        var arrayVal = view.resources.getStringArray(R.array.task_status_array)
         var aa = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayVal)
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         view.spinner.adapter = aa

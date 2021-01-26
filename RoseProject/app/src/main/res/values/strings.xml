@@ -46,7 +46,7 @@
     <string name="close">close</string>
     <string name="create_new_team">Create New Team</string>
 
-    <string-array name="task_status_arrry">
+    <string-array name="task_status_array">
         <item>Not Started</item>
         <item>Ongoing</item>
         <item>Completed</item>

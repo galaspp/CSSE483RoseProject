@@ -1,8 +1,11 @@
 package edu.rosehulman.galaspp.roseproject.ui.createeditteam
 
 import android.content.Context
+import android.os.Build
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.R
@@ -18,6 +21,7 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
         return NavDrawerHolder(context, view, this)
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onBindViewHolder(holder: NavDrawerHolder, position: Int) {
         holder.bind(allTeams[position])
     }
