@@ -1,23 +1,15 @@
 package edu.rosehulman.galaspp.roseproject.ui.project
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.FragmentListener
 import edu.rosehulman.galaspp.roseproject.R
-import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileAdapter
-import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
-import kotlinx.android.synthetic.main.fragment_profile.*
-import kotlinx.android.synthetic.main.fragment_profile.view.*
 import kotlinx.android.synthetic.main.fragment_project.view.*
 
 
@@ -65,8 +57,9 @@ class ProjectFragment : Fragment() {
         val recyclerView = view.findViewById<RecyclerView>(R.id.project_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.setHasFixedSize(true)
-        adapter = ProjectAdapter(requireContext())
+        adapter = project?.let { ProjectAdapter(requireContext(), it) }!!
         recyclerView.adapter = adapter
+
 
         if(context is FragmentListener) {
             (context as FragmentListener).fab.setOnClickListener {

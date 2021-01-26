@@ -9,17 +9,17 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.R
-import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
 import kotlin.collections.ArrayList
 
 class ProjectAdapter(
         private var context: Context,
+        private var project: ProjectObject,
 ) : RecyclerView.Adapter<ProjectViewHolder>(){
 
-    val tasks = ArrayList<Task>()
+    var tasks = ArrayList<Task>()
 
-    override fun getItemCount() = tasks.size
+    override fun getItemCount() = project.projectTasks.size//tasks.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProjectViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.task_row_view, parent, false)
@@ -34,24 +34,39 @@ class ProjectAdapter(
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onBindViewHolder(viewHolder: ProjectViewHolder, index: Int) {
-        viewHolder.bind(tasks[index])
+        //viewHolder.bind(tasks[index])
+        viewHolder.bind(project.projectTasks[index])
     }
 
     fun add(task: Task){
-        tasks.add(task)
+        //tasks.add(task)
+        project.projectTasks.add(task)
         notifyDataSetChanged()
     }
 
+    fun setDataSet(array: ArrayList<Task>) {
+        tasks = array
+        notifyDataSetChanged()
+    }
+
+    fun getDataSet(): ArrayList<Task> {
+        return tasks
+    }
+
     private fun editItem(position: Int, task: Task) {
-        tasks[position].name = task.name
-        tasks[position].assignedTo = task.assignedTo
-        tasks[position].urgency = task.urgency
+//        tasks[position].name = task.name
+//        tasks[position].assignedTo = task.assignedTo
+//        tasks[position].urgency = task.urgency
+        project.projectTasks[position].name = task.name
+        project.projectTasks[position].assignedTo = task.assignedTo
+        project.projectTasks[position].urgency = task.urgency
         notifyDataSetChanged()
 
     }
 
     private fun remove(position: Int){
-        tasks.removeAt(position)
+//        tasks.removeAt(position)
+        project.projectTasks.removeAt(position)
         notifyItemRemoved(position)
     }
 
@@ -70,9 +85,12 @@ class ProjectAdapter(
 
         if(position != -1)
         {
-            view.edit_text_task_name.setText(tasks[position].name)
-            view.edit_text_assign_description.setText(tasks[position].assignedTo)
-            view.edit_text_urgency_description.setText(tasks[position].urgency.toString())
+//            view.edit_text_task_name.setText(tasks[position].name)
+//            view.edit_text_assign_description.setText(tasks[position].assignedTo)
+//            view.edit_text_urgency_description.setText(tasks[position].urgency.toString())
+            view.edit_text_task_name.setText(project.projectTasks[position].name)
+            view.edit_text_assign_description.setText(project.projectTasks[position].assignedTo)
+            view.edit_text_urgency_description.setText(project.projectTasks[position].urgency.toString())
         }
 
         var arrayVal = view.resources.getStringArray(R.array.task_status_array)
@@ -81,10 +99,16 @@ class ProjectAdapter(
         view.spinner.adapter = aa
 
         builder.setPositiveButton("Save") { _, _ ->
+            var urgancy = 0
+            if(view.edit_text_urgency_description.text.toString() != "")
+                urgancy = view.edit_text_urgency_description.text.toString().toInt()
+
             val task = Task(view.edit_text_task_name.text.toString(),
                     view.edit_text_assign_description.text.toString(),
-                    view.edit_text_urgency_description.text.toString().toInt()
+                    urgancy
             )
+
+
             if(position == -1)
             {
                 add(task)
