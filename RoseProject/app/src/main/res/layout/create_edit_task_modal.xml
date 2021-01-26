@@ -63,7 +63,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/enter_username_input"
         android:ems="10"
-        android:inputType="number"
+        android:inputType="text"
         android:layout_marginBottom="20dp"
         android:layout_marginStart="22dp"
         android:layout_marginEnd="22dp"/>

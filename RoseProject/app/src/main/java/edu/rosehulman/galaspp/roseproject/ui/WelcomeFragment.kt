@@ -20,7 +20,7 @@ class WelcomeFragment() : Fragment() {
             savedInstanceState: Bundle?
     ): View? {
         if(context is FragmentListener) {
-            (context as FragmentListener).fab.show()
+//            (context as FragmentListener).fab.show()
         }
         return  inflater.inflate(R.layout.fragment_welcome, container, false)
     }

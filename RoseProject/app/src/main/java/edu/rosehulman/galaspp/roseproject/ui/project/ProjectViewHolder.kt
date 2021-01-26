@@ -26,6 +26,7 @@ class ProjectViewHolder : RecyclerView.ViewHolder {
         }
         itemView.setOnLongClickListener {
             Log.d("test", "Edit ${adapter.tasks[adapterPosition].name}")
+            adapter.showCreateorEditTaskModal(adapterPosition)
             true
         }
 

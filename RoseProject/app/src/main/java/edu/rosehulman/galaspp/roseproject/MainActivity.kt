@@ -1,5 +1,6 @@
 package edu.rosehulman.galaspp.roseproject
 
+import android.opengl.Visibility
 import android.os.Bundle
 import android.renderscript.Script
 import android.util.Log
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.View.GONE
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
@@ -47,10 +49,10 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener, 
         setSupportActionBar(toolbar)
 
         fab = findViewById(R.id.fab)
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
+//        fab.setOnClickListener { view ->
+//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                    .setAction("Action", null).show()
+//        }
 
         //Navigation Drawer Start
         //https://www.droidcon.com/news-detail?content-id=/repository/collaboration/Groups/spaces/droidcon_hq/Documents/public/news/android-news/Android%20Material%20Component!%20An%20easy%20approach%20to%20Navigation%20Drawer%20(Part%20I)
@@ -191,30 +193,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener, 
 
         val view = LayoutInflater.from(this).inflate(R.layout.create_project_modal, null, false)
         builder.setView(view)
-
-        builder.setPositiveButton("Save") { _, _ ->
-
-        }
-
-        builder.setNegativeButton(android.R.string.cancel, null)
-
-        builder.create().show()
-    }
-
-    private fun showCreateorEditTaskModal()
-    {
-        val builder = AlertDialog.Builder(this)
-        //TODO: Change title based on whether editing or creating team
-        //TODO: Prepopulate items as needed
-        builder.setTitle("Create Task?")
-
-        val view = LayoutInflater.from(this).inflate(R.layout.create_edit_task_modal, null, false)
-        builder.setView(view)
-
-        var arrayVal = view.resources.getStringArray(R.array.task_status_array)
-        var aa = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayVal)
-        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        view.spinner.adapter = aa
 
         builder.setPositiveButton("Save") { _, _ ->
 
