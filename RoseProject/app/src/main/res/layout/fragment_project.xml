@@ -9,7 +9,7 @@
             android:id="@+id/project_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Project Title"
+            android:text="@string/project_title"
             android:textSize="40sp"
             android:layout_centerHorizontal="true"/>
 

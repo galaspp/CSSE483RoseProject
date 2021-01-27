@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -50,7 +51,7 @@ class ProjectFragment : Fragment() {
 
         //Spinner
         val arrayVal = resources.getStringArray(R.array.task_status_array)
-        val aa = ArrayAdapter(view.context, android.R.layout.simple_spinner_item, arrayVal)
+        val aa = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, arrayVal)
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         view.project_fragment_spinner.adapter = aa
 
@@ -60,6 +61,21 @@ class ProjectFragment : Fragment() {
         adapter = project?.let { ProjectAdapter(requireContext(), it) }!!
         recyclerView.adapter = adapter
 
+        adapter.setFilter(view.project_fragment_spinner.selectedItemPosition)
+        view.project_fragment_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (parent != null) {
+                    adapter.setFilter(parent.selectedItemPosition)
+                }
+                    adapter.setFilter(id.toInt())
+
+            }
+
+        }
 
         if(context is FragmentListener) {
             (context as FragmentListener).fab.setOnClickListener {
