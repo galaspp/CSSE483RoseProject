@@ -23,7 +23,7 @@ class ProjectAdapter(
 //    var tasks = ArrayList<Task>()
     private var itemFilter: Int = 0
 
-    override fun getItemCount() = project.projectTasks.size//tasks.size
+    override fun getItemCount() = project.projectTasks.filter { s -> s.currentStatus == itemFilter }.size//tasks.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProjectViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.task_row_view, parent, false)
@@ -39,7 +39,7 @@ class ProjectAdapter(
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onBindViewHolder(viewHolder: ProjectViewHolder, index: Int) {
         //viewHolder.bind(tasks[index])
-        viewHolder.bind(project.projectTasks[index])
+        viewHolder.bind(project.projectTasks.filter { s -> s.currentStatus == itemFilter }[index])
     }
 
     fun add(task: Task){
@@ -58,12 +58,10 @@ class ProjectAdapter(
 //    }
 
     fun setFilter(position: Int) {
-        Log.d("YEET2",  project.projectTasks.filter { s -> s.currentStatus == position }.size.toString())
+//        Log.d("YEET2",  project.projectTasks.filter { s -> s.currentStatus == position }.size.toString())
 //        project.projectTasks.filter { s -> s.currentStatus == position }.size
-    }
-    fun setFilter1(position: Int) {
-        Log.d("YEET3",  project.projectTasks.filter { s -> s.currentStatus == position }.size.toString())
-//        project.projectTasks.filter { s -> s.currentStatus == position }.size
+        itemFilter = position
+        notifyDataSetChanged()
     }
 
 

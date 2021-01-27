@@ -61,18 +61,13 @@ class ProjectFragment : Fragment() {
         adapter = project?.let { ProjectAdapter(requireContext(), it) }!!
         recyclerView.adapter = adapter
 
-        adapter.setFilter(view.project_fragment_spinner.selectedItemPosition)
         view.project_fragment_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
             override fun onNothingSelected(parent: AdapterView<*>?) {
 
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (parent != null) {
-                    adapter.setFilter(parent.selectedItemPosition)
-                }
-                    adapter.setFilter(id.toInt())
-
+                    adapter.setFilter(position)
             }
 
         }
