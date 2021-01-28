@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "620625720597",
+    "project_id": "roseproject-8a5f3",
+    "storage_bucket": "roseproject-8a5f3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:620625720597:android:b04a1352a1d7d367cde51c",
+        "android_client_info": {
+          "package_name": "edu.rosehulman.galaspp.roseproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "620625720597-a3gu6rnbu2gcfj05phb50ab4v0ib8lkk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2fSMkeNzdnsARjl9CLNfqhlnRY7XCpc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "620625720597-a3gu6rnbu2gcfj05phb50ab4v0ib8lkk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
