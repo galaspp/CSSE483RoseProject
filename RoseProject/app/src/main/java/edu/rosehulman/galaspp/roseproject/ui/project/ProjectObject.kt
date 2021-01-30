@@ -1,12 +1,27 @@
 package edu.rosehulman.galaspp.roseproject.ui.project
 
 import android.os.Parcelable
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Exclude
+import edu.rosehulman.galaspp.roseproject.ui.createeditteam.TeamObject
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class ProjectObject(var projectTitle: String = "",
-                         var projectDescription: String = ""
+data class ProjectObject(
+    var projectTitle: String = "",
+    var projectDescription: String = "",
+    var taskReferences: ArrayList<String> = ArrayList()
 ): Parcelable
 {
-    var projectTasks: ArrayList<Task> = ArrayList()
+    @get: Exclude var projectTasks: ArrayList<TaskObject> = ArrayList()
+    @get: Exclude var id = ""
+
+    companion object{
+        fun fromSnapshot(snapshot: DocumentSnapshot): ProjectObject {
+            val proj = snapshot.toObject(ProjectObject::class.java)!!
+            proj.id = snapshot.id
+            return proj
+        }
+    }
+
 }

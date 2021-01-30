@@ -69,7 +69,7 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         //Set list adapter
         listAdapter = CustomExpandableListAdapter(context, listDataHeader, listDataChild)
         expListView.setAdapter(listAdapter)
-        expListView.bottomEdgeEffectColor = ContextCompat.getColor(context, R.color.white)
+//        expListView.bottomEdgeEffectColor = ContextCompat.getColor(context, R.color.white)
 
         //Adjust size based on # of projects in view and if group is expanded
         val card : CardView = view.drawer_card_view

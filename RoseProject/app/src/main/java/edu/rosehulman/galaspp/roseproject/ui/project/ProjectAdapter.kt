@@ -31,11 +31,11 @@ class ProjectAdapter(
         return ProjectViewHolder(view, this, context)
     }
 
-    init{
-        add(Task("Do things", "Piotr", 3, 0, 0.0, ArrayList<String>()))
-        add(Task("Complete pls", "Cameron", 10, 0, 0.0, ArrayList<String>()))
-        add(Task("Not sure", "IDK", 0, 0, 0.0, ArrayList<String>()))
-    }
+//    init{
+//        add(Task("Do things", "Piotr", 3, 0, 0.0))
+//        add(Task("Complete pls", "Cameron", 10, 0, 0.0, ))
+//        add(Task("Not sure", "IDK", 0, 0, 0.0))
+//    }
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onBindViewHolder(viewHolder: ProjectViewHolder, index: Int) {
@@ -43,7 +43,7 @@ class ProjectAdapter(
         viewHolder.bind(project.projectTasks.filter { s -> s.currentStatus == itemFilter }[index])
     }
 
-    fun add(task: Task){
+    fun add(task: TaskObject){
         //tasks.add(task)
         project.projectTasks.add(task)
         notifyDataSetChanged()
@@ -66,7 +66,7 @@ class ProjectAdapter(
     }
 
 
-    private fun editItem(position: Int, task: Task) {
+    private fun editItem(position: Int, task: TaskObject) {
 //        tasks[position].name = task.name
 //        tasks[position].assignedTo = task.assignedTo
 //        tasks[position].urgency = task.urgency
@@ -150,13 +150,19 @@ class ProjectAdapter(
             if(position == -1)
             {
                 val arrayList: ArrayList<String> = arrayListOf("Task Created")
-                val task = Task(view.edit_text_task_name.text.toString(),
-                        view.edit_text_assign_description.text.toString(),
-                        urgancy,
-                        view.spinner_task.selectedItemPosition,
-                        0.0,
-                        arrayList
+                val task = TaskObject(view.edit_text_task_name.text.toString(),
+                    view.edit_text_assign_description.text.toString(),
+                    urgancy,
+                    view.spinner_task.selectedItemPosition,
+                    0.0
                 )
+//                val task = Task(view.edit_text_task_name.text.toString(),
+//                        view.edit_text_assign_description.text.toString(),
+//                        urgancy,
+//                        view.spinner_task.selectedItemPosition,
+//                        0.0,
+//                        arrayList
+//                )
                 add(task)
             }
             else
@@ -166,13 +172,13 @@ class ProjectAdapter(
                     project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog.add("Changed Status To ${arrayVal[view.spinner_task.selectedItemPosition]}")
                 }
 
-                val task = Task(view.edit_text_task_name.text.toString(),
-                        view.edit_text_assign_description.text.toString(),
-                        urgancy,
-                        view.spinner_task.selectedItemPosition,
-                        project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours,
-                        project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog
-                        )
+                val task = TaskObject(view.edit_text_task_name.text.toString(),
+                    view.edit_text_assign_description.text.toString(),
+                    urgancy,
+                    view.spinner_task.selectedItemPosition,
+                    project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours,
+//                  project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog
+                )
                 editItem(position, task)
                 recyclerViewAdapter?.notifyDataSetChanged()
             }

@@ -36,7 +36,7 @@ class ProjectViewHolder : RecyclerView.ViewHolder {
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun bind(task: Task) {
+    fun bind(task: TaskObject) {
         task_view.text = task.name
         assigned_view.text = task.assignedTo
         urgency_view.text = task.urgency.toString()

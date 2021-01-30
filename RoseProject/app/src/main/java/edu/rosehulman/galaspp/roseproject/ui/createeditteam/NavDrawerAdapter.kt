@@ -4,55 +4,110 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.PointerIcon
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.*
+import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.R
 import edu.rosehulman.galaspp.roseproject.ui.project.ProjectObject
+import edu.rosehulman.galaspp.roseproject.ui.project.TaskObject
 import kotlinx.android.synthetic.main.create_project_modal.view.*
 
 class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener) : RecyclerView.Adapter<NavDrawerHolder>() {
-    private var allTeams : ArrayList<TeamObject> = ArrayList()
+    private var teams : ArrayList<TeamObject> = ArrayList()
     var projects = HashMap<String, ArrayList<ProjectObject>>()
 
-    private val teamRef = FirebaseFirestore
+    private val teamsRef = FirebaseFirestore
         .getInstance()
-        .collection("teams")
+        .collection(Constants.TEAMS_COLLECTION)
+    private val projectsRef = FirebaseFirestore
+        .getInstance()
+        .collection(Constants.PROJECTS_COLLECTION)
+    private val tasksRef = FirebaseFirestore
+        .getInstance()
+        .collection(Constants.TASKS_COLLECTION)
 
     init {
-        teamRef
+        teamsRef
             .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
                 if(exception != null) {
-                    Log.e("NAVDRAWERERROR", "Listen Error: $exception")
+                    Log.e("Nav Drawer Error", "Listen Error: $exception")
                     return@addSnapshotListener
                 }
                 for(teamChange in snapshot!!.documentChanges) {
                     val team = TeamObject.fromSnapshot(teamChange.document)
                     when(teamChange.type) {
                         DocumentChange.Type.ADDED -> {
-//                            Log.d("NAVDRAWERERROR", "Team: $team")
-                            allTeams.add(0, team)
-                            projects[allTeams[0].teamName] = ArrayList()
+                            teams.add(0, team)
+                            projects[teams[0].teamName] = ArrayList()
                             notifyItemInserted(0)
                         }
                         DocumentChange.Type.REMOVED -> {
-                            val pos = allTeams.indexOfFirst { team.id == it.id }
-                            //TODO: Finish this
+                            val pos = teams.indexOfFirst { team.id == it.id }
+                            deleteProjectReferences(team.projectReferences)
+                            teams.removeAt(pos)
+                            notifyItemRemoved(pos)
                         }
                         DocumentChange.Type.MODIFIED -> {
-                            //TODO: Finish this
-                            val pos = allTeams.indexOfFirst{ team.id == it.id}
-                            allTeams[pos] = team
+                            val pos = teams.indexOfFirst{ team.id == it.id }
+                            teams[pos] = team
+                            getProjectsFromIDs(team.projectReferences, team)
                             notifyItemChanged(pos)
                         }
                     }
                 }
             }
+        teams.clear()
+        teamsRef.get().addOnSuccessListener { snapshot2: QuerySnapshot ->
+            for(doc in 0 until snapshot2.size()){
+                //Get Team DOC
+                val tm = TeamObject.fromSnapshot(snapshot2.documents[snapshot2.size() - doc - 1]) //Converts Firebase to TeamObject
+//                teams.add(tm) //Add team to list
+                projects[tm.teamName] = ArrayList() //Add empty proj list to map with team names
+
+                //Get Projects
+                getProjectsFromIDs(tm.projectReferences, tm)
+            }
+            notifyDataSetChanged()
+        }
+    }
+
+    private fun deleteProjectReferences(projectReferences: ArrayList<String>) {
+        for( refID in projectReferences ){
+            projectsRef.document(refID).delete()
+        }
+    }
+
+    private fun getProjectsFromIDs(projIds : ArrayList<String>, tm : TeamObject) {
+        //Get top level projects reference from firebase
+        //loop over ids and match with documents from projects reference, then convert and add to lists
+        for (projId in projIds) {
+            projectsRef.document(projId).get().addOnSuccessListener{ snapshot: DocumentSnapshot ->
+                //Add Project to team
+                val po = ProjectObject.fromSnapshot(snapshot)
+                tm.projects.add(po)
+                projects[tm.teamName]?.add(po)
+
+                //Get tasks
+                getTasksFromIDs(po.taskReferences, po)
+                notifyDataSetChanged()
+            }
+        }
+    }
+
+    private fun getTasksFromIDs(ids : ArrayList<String>, po : ProjectObject) {
+        //Get top level task reference from firebase
+        //loop over ids and match with documents from tasks reference, then convert and add to lists
+        for (id in ids) {
+            tasksRef.document(id).get().addOnSuccessListener{snapshot: DocumentSnapshot ->
+                val task = TaskObject.fromSnapshot(snapshot)
+                po.projectTasks.add(task)
+                notifyDataSetChanged()
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NavDrawerHolder {
@@ -62,67 +117,59 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onBindViewHolder(holder: NavDrawerHolder, position: Int) {
-        holder.bind(allTeams[position])
+        holder.bind(teams[position])
     }
 
     override fun getItemCount(): Int {
-        return allTeams.size
+        return teams.size
     }
 
-    fun addTeam(newTeam: TeamObject)
-    {
-//        allTeams.add(0, newTeam)
-        newTeam.projects = ArrayList()
-        teamRef.add(newTeam)
-        projects[allTeams[0].teamName] = ArrayList()
-        notifyItemInserted(0)
+    fun addTeam(team: TeamObject){
+        teamsRef.add(team)
     }
 
-    fun editTeamClicked(adapterPosition: Int)
-    {
+    fun editTeamClicked(adapterPosition: Int)    {
         listener.onEditTeamItemSelected(adapterPosition, this)
     }
 
-    fun getTeamDetails(position: Int): TeamObject
-    {
-        return allTeams[position]
+    fun getTeamDetails(position: Int): TeamObject    {
+        return teams[position]
     }
 
     fun getListOfProjects(position: Int): ArrayList<ProjectObject> {
-        return allTeams[position].projects
+        //TODO: re-evaluate
+//        return teams[position].projects
+        return ArrayList<ProjectObject>()
     }
 
-    fun editTeamAtPosition(position: Int, teamName: String, teamDescription: String, members: ArrayList<MemberObject>, projects: ArrayList<ProjectObject>)
-    {
-        allTeams[position].teamName = teamName
-        allTeams[position].teamDescription = teamDescription
-        allTeams[position].members = members
-        allTeams[position].projects = projects
-        this.projects[allTeams[position].teamName] = projects
+    fun editTeamAtPosition(position: Int, teamName: String, teamDescription: String,
+                           members: ArrayList<MemberObject>, projects: ArrayList<ProjectObject>){
+        //Todo: Complete edit team
+//        teams[position].teamName = teamName
+//        teams[position].teamDescription = teamDescription
+//        teams[position].members = members
+//        teams[position].projects = projects
+//        this.projects[teams[position].teamName] = projects
 
-        teamRef.document(allTeams[position].id).set(allTeams[position])
+//        teamRef.document(teams[position].id).set(teams[position])
 //        notifyItemChanged(position)
     }
 
-    fun showCreateProjectModal(position: Int)
-    {
+    fun showCreateProjectModal(position: Int) {
         val builder = AlertDialog.Builder(context)
-        //TODO: Change title based on whether editing or creating Project
-        //TODO: Prepopulate items as needed
         builder.setTitle("Create Project? (Admin Only)")
-
         val view = LayoutInflater.from(context).inflate(R.layout.create_project_modal, null, false)
         builder.setView(view)
-
         builder.setPositiveButton("Save") { _, _ ->
-            val projectlist = projects[allTeams[position].teamName]
-            projectlist?.add(ProjectObject(view.edit_text_project_name.text.toString(),
-                    view.edit_text_project_description.text.toString()))
-
-            if (projectlist != null) {
-                editTeamAtPosition(position, allTeams[position].teamName,  allTeams[position].teamDescription,  allTeams[position].members, projectlist)
-            }
-//            notifyItemChanged(position)
+            // Create Project from dialog boxes
+            val addedProject = ProjectObject(view.edit_text_project_name.text.toString(),
+                view.edit_text_project_description.text.toString())
+            //Add project to project collection in firebase
+            projectsRef.add(addedProject)
+                .addOnSuccessListener { snapshot: DocumentReference ->
+                    //Add project ID to team document in firebase
+                    teamsRef.document(teams[position].id).update(Constants.PROJECTS_FIELD, FieldValue.arrayUnion(snapshot.id))
+                }
         }
         builder.setNegativeButton(android.R.string.cancel, null)
         builder.create().show()
