@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.PointerIcon
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -60,18 +59,6 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
                     }
                 }
             }
-//        teams.clear()
-//        teamsRef.get().addOnSuccessListener { snapshot2: QuerySnapshot ->
-//            for(doc in 0 until snapshot2.size()){
-//                //Get Team DOC
-//                val tm = TeamObject.fromSnapshot(snapshot2.documents[snapshot2.size() - doc - 1]) //Converts Firebase to TeamObject
-////                projects[tm.teamName] = ArrayList() //Add empty proj list to map with team names
-//
-//                //Get Projects
-//                getProjectsFromIDs(tm.projectReferences, tm)
-//            }
-//            notifyDataSetChanged()
-//        }
     }
 
     private fun deleteProjectReferences(projectReferences: ArrayList<String>) {
@@ -125,42 +112,44 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
     private fun getTasksFromIDs(ids : ArrayList<String>, po : ProjectObject) {
         //Get top level task reference from firebase
         //loop over ids and match with documents from tasks reference, then convert and add to lists
-//        tasksRef
+        tasksRef
 //                .whereEqualTo("id", ids)
-//                .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
-//                    if (exception != null) {
-//                        Log.e("Nav Drawer Error", "Listen Error: $exception")
-//                        return@addSnapshotListener
-//                    }
-//                    for (taskChange in snapshot!!.documentChanges) {
-//                        val task = TaskObject.fromSnapshot(taskChange.document)
-//                        when (taskChange.type) {
-//                            DocumentChange.Type.ADDED -> {
-//                                po.projectTasks.add(0, task)
-//                                notifyItemInserted(0)
-//                            }
-//                            DocumentChange.Type.REMOVED -> {
-////                                val pos = teams.indexOfFirst { team.id == it.id }
-////                                deleteProjectReferences(team.projectReferences)
-////                                teams.removeAt(pos)
-////                                notifyItemRemoved(pos)
-//                            }
-//                            DocumentChange.Type.MODIFIED -> {
-////                                val pos = teams.indexOfFirst{ team.id == it.id }
-////                                teams[pos] = team
-////                                getProjectsFromIDs(team.projectReferences, team)
-////                                notifyItemChanged(pos)
-//                            }
-//                        }
-//                    }
-//                }
-        for (id in ids) {
-            tasksRef.document(id).get().addOnSuccessListener{snapshot: DocumentSnapshot ->
-                val task = TaskObject.fromSnapshot(snapshot)
-                po.projectTasks.add(task)
-                notifyDataSetChanged()
-            }
-        }
+                .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
+                    if (exception != null) {
+                        Log.e("Nav Drawer Error", "Listen Error: $exception")
+                        return@addSnapshotListener
+                    }
+                    for (taskChange in snapshot!!.documentChanges) {
+                        val task = TaskObject.fromSnapshot(taskChange.document)
+                        if (ids.contains(task.id)) {
+                            when (taskChange.type) {
+                                DocumentChange.Type.ADDED -> {
+                                    po.projectTasks.add(task)
+                                    notifyDataSetChanged()
+                                }
+                                DocumentChange.Type.REMOVED -> {
+//                                val pos = teams.indexOfFirst { team.id == it.id }
+//                                deleteProjectReferences(team.projectReferences)
+//                                teams.removeAt(pos)
+//                                notifyItemRemoved(pos)
+                                }
+                                DocumentChange.Type.MODIFIED -> {
+//                                val pos = teams.indexOfFirst{ team.id == it.id }
+//                                teams[pos] = team
+//                                getProjectsFromIDs(team.projectReferences, team)
+//                                notifyItemChanged(pos)
+                                }
+                            }
+                        }
+                    }
+                }
+//        for (id in ids) {
+//            tasksRef.document(id).get().addOnSuccessListener{snapshot: DocumentSnapshot ->
+//                val task = TaskObject.fromSnapshot(snapshot)
+//                po.projectTasks.add(task)
+//                notifyDataSetChanged()
+//            }
+//        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NavDrawerHolder {
@@ -189,10 +178,29 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
         return teams[position]
     }
 
-    fun getListOfProjects(position: Int): ArrayList<ProjectObject> {
-        //TODO: re-evaluate
-//        return teams[position].projects
-        return ArrayList<ProjectObject>()
+    private fun removeProject(itemId : String) {
+        var itemFound = false
+        for (tm in teams)
+        {
+            for(po in tm.projects)
+            {
+                if(po.id == itemId)
+                {
+                    var taskItems = po.taskReferences
+                    projectsRef.document(itemId).delete().addOnSuccessListener {
+                        for(task in taskItems)
+                        {
+                            tasksRef.document(task).delete()
+                        }
+                        teamsRef.document(tm.id).update("projectReferences", FieldValue.arrayRemove(itemId))
+                    }
+                    itemFound = true
+                    break
+                }
+            }
+            if(itemFound)
+                break
+        }
     }
 
     fun editTeamAtPosition(position: Int, teamName: String, teamDescription: String,
@@ -208,23 +216,64 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
 //        notifyItemChanged(position)
     }
 
-    fun showCreateProjectModal(position: Int) {
+
+    fun showCreateProjectModal(position: Int, childPosition: Int = -1,  projects: ArrayList<ProjectObject> = ArrayList()) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Create Project? (Admin Only)")
+        if(childPosition == -1)
+            builder.setTitle("Create Project? (Admin Only)")
+        else
+            builder.setTitle("Edit Project? (Admin Only)")
+
         val view = LayoutInflater.from(context).inflate(R.layout.create_project_modal, null, false)
+        if(childPosition != -1)
+        {
+            view.edit_text_project_name.setText(projects[childPosition].projectTitle)
+            view.edit_text_project_description.setText(projects[childPosition].projectDescription)
+        }
         builder.setView(view)
         builder.setPositiveButton("Save") { _, _ ->
-            // Create Project from dialog boxes
-            val addedProject = ProjectObject(view.edit_text_project_name.text.toString(),
-                view.edit_text_project_description.text.toString())
-            //Add project to project collection in firebase
-            projectsRef.add(addedProject)
-                .addOnSuccessListener { snapshot: DocumentReference ->
-                    //Add project ID to team document in firebase
-                    teamsRef.document(teams[position].id).update(Constants.PROJECTS_FIELD, FieldValue.arrayUnion(snapshot.id))
-                }
+            if(childPosition == -1) {
+                // Create Project from dialog boxes
+                val addedProject = ProjectObject(view.edit_text_project_name.text.toString(),
+                        view.edit_text_project_description.text.toString())
+                //Add project to project collection in firebase
+                projectsRef.add(addedProject)
+                        .addOnSuccessListener { snapshot: DocumentReference ->
+                            //Add project ID to team document in firebase
+                            teamsRef.document(teams[position].id).update(Constants.PROJECTS_FIELD, FieldValue.arrayUnion(snapshot.id))
+                        }
+            }
+            else
+            {
+                var addedProject = projects[childPosition]
+                addedProject.projectTitle = view.edit_text_project_name.text.toString()
+                addedProject.projectDescription = view.edit_text_project_description.text.toString()
+   
+                projectsRef.document(projects[childPosition].id).set(addedProject)
+            }
         }
         builder.setNegativeButton(android.R.string.cancel, null)
+
+        if(childPosition != -1) {
+            builder.setNeutralButton("Delete") { _,_ ->
+                confirmDeleteModal(projects[childPosition].id)
+            }
+        }
+        builder.create().show()
+    }
+
+    private fun confirmDeleteModal(itemId : String)
+    {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(R.string.deleteProject)
+        builder.setMessage(R.string.deleteProjectMessage)
+
+        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+            removeProject(itemId)
+        }
+
+        builder.setNegativeButton(android.R.string.cancel, null) //Do Nothing
+
         builder.create().show()
     }
 
