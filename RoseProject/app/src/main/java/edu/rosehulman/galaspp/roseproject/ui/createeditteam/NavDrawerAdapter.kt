@@ -84,23 +84,90 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
     private fun getProjectsFromIDs(projIds : ArrayList<String>, tm : TeamObject) {
         //Get top level projects reference from firebase
         //loop over ids and match with documents from projects reference, then convert and add to lists
-        for (projId in projIds) {
-            projectsRef.document(projId).get().addOnSuccessListener{ snapshot: DocumentSnapshot ->
-                //Add Project to team
-                val po = ProjectObject.fromSnapshot(snapshot)
-                tm.projects.add(po)
-                projects[tm.teamName]?.add(po)
-
-                //Get tasks
-                getTasksFromIDs(po.taskReferences, po)
-                notifyDataSetChanged()
-            }
-        }
+//        Log.d("TEST", projIds.toString())
+        projectsRef
+//                .whereEqualTo("id", projIds)
+                .addSnapshotListener {snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
+                    if(exception != null) {
+                        Log.e("Nav Drawer Error", "Listen Error: $exception")
+                        return@addSnapshotListener
+                    }
+                    for(projChange in snapshot!!.documentChanges) {
+                        val po = ProjectObject.fromSnapshot(projChange.document)
+                        if(projIds.contains(po.id)) {
+                            when (projChange.type) {
+                                DocumentChange.Type.ADDED -> {
+                                    tm.projects.add(0, po)
+//                                projects[teams[0].teamName] = ArrayList()
+                                    projects[tm.teamName]?.add(po)
+                                    getTasksFromIDs(po.taskReferences, po)
+//                                notifyItemInserted(0)
+                                    notifyDataSetChanged()
+                                }
+                                DocumentChange.Type.REMOVED -> {
+//                                val pos = teams.indexOfFirst { team.id == it.id }
+//                                deleteProjectReferences(team.projectReferences)
+//                                teams.removeAt(pos)
+//                                notifyItemRemoved(pos)
+                                }
+                                DocumentChange.Type.MODIFIED -> {
+                                    val pos = tm.projects.indexOfFirst { po.id == it.id }
+                                    tm.projects.add(po)
+//                                getProjectsFromIDs(team.projectReferences, team)
+                                    getTasksFromIDs(po.taskReferences, po)
+//                                notifyItemChanged(pos)
+                                    notifyDataSetChanged()
+                                }
+                            }
+                        }
+                    }
+                }
+//        for (projId in projIds) {
+//            projectsRef.document(projId).get().addOnSuccessListener{ snapshot: DocumentSnapshot ->
+//                //Add Project to team
+//                val po = ProjectObject.fromSnapshot(snapshot)
+//                tm.projects.add(po)
+//                projects[tm.teamName]?.add(po)
+//
+//                //Get tasks
+//                getTasksFromIDs(po.taskReferences, po)
+//                notifyDataSetChanged()
+//            }
+//        }
     }
 
     private fun getTasksFromIDs(ids : ArrayList<String>, po : ProjectObject) {
         //Get top level task reference from firebase
         //loop over ids and match with documents from tasks reference, then convert and add to lists
+//        tasksRef
+//                .whereEqualTo("id", ids)
+//                .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
+//                    if (exception != null) {
+//                        Log.e("Nav Drawer Error", "Listen Error: $exception")
+//                        return@addSnapshotListener
+//                    }
+//                    for (taskChange in snapshot!!.documentChanges) {
+//                        val task = TaskObject.fromSnapshot(taskChange.document)
+//                        when (taskChange.type) {
+//                            DocumentChange.Type.ADDED -> {
+//                                po.projectTasks.add(0, task)
+//                                notifyItemInserted(0)
+//                            }
+//                            DocumentChange.Type.REMOVED -> {
+////                                val pos = teams.indexOfFirst { team.id == it.id }
+////                                deleteProjectReferences(team.projectReferences)
+////                                teams.removeAt(pos)
+////                                notifyItemRemoved(pos)
+//                            }
+//                            DocumentChange.Type.MODIFIED -> {
+////                                val pos = teams.indexOfFirst{ team.id == it.id }
+////                                teams[pos] = team
+////                                getProjectsFromIDs(team.projectReferences, team)
+////                                notifyItemChanged(pos)
+//                            }
+//                        }
+//                    }
+//                }
         for (id in ids) {
             tasksRef.document(id).get().addOnSuccessListener{snapshot: DocumentSnapshot ->
                 val task = TaskObject.fromSnapshot(snapshot)

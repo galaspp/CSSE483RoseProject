@@ -12,6 +12,10 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.R
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
 import kotlin.collections.ArrayList
@@ -23,6 +27,12 @@ class ProjectAdapter(
 
 //    var tasks = ArrayList<Task>()
     private var itemFilter: Int = 0
+    private val projectsRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.PROJECTS_COLLECTION)
+    private val tasksRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.TASKS_COLLECTION)
 
     override fun getItemCount() = project.projectTasks.filter { s -> s.currentStatus == itemFilter }.size//tasks.size
 
@@ -46,6 +56,12 @@ class ProjectAdapter(
     fun add(task: TaskObject){
         //tasks.add(task)
         project.projectTasks.add(task)
+        tasksRef
+                .add(task)
+                .addOnSuccessListener { snapshot: DocumentReference ->
+                    projectsRef.document(project.id).update("taskReferences", FieldValue.arrayUnion(snapshot.id))
+                }
+
         notifyDataSetChanged()
     }
 
