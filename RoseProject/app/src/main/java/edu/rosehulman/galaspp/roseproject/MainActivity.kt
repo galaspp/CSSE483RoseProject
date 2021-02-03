@@ -176,8 +176,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener, 
                 adapterNav.editTeamAtPosition(position,
                         view.edit_text_team_name.text.toString(),
                         view.edit_text_team_description.text.toString(),
-                        adapter.getListOfMembers(),
-                        adapterNav.getListOfProjects(position)
+                        adapter.getListOfMembers()
                 )
             }
 

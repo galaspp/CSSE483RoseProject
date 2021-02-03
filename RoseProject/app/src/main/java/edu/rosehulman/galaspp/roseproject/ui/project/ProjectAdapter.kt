@@ -12,9 +12,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.*
 import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.R
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
@@ -25,7 +23,6 @@ class ProjectAdapter(
         private var project: ProjectObject,
 ) : RecyclerView.Adapter<ProjectViewHolder>(){
 
-//    var tasks = ArrayList<Task>()
     private var itemFilter: Int = 0
     private val projectsRef = FirebaseFirestore
             .getInstance()
@@ -41,51 +38,32 @@ class ProjectAdapter(
         return ProjectViewHolder(view, this, context)
     }
 
-//    init{
-//        add(Task("Do things", "Piotr", 3, 0, 0.0))
-//        add(Task("Complete pls", "Cameron", 10, 0, 0.0, ))
-//        add(Task("Not sure", "IDK", 0, 0, 0.0))
-//    }
-
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onBindViewHolder(viewHolder: ProjectViewHolder, index: Int) {
-        //viewHolder.bind(tasks[index])
         viewHolder.bind(project.projectTasks.filter { s -> s.currentStatus == itemFilter }[index])
     }
 
     fun add(task: TaskObject){
-        //tasks.add(task)
-        project.projectTasks.add(task)
         tasksRef
                 .add(task)
                 .addOnSuccessListener { snapshot: DocumentReference ->
                     projectsRef.document(project.id).update("taskReferences", FieldValue.arrayUnion(snapshot.id))
+                    task.id = snapshot.id
+                    project.projectTasks.add(task)
+                    notifyDataSetChanged()
                 }
-
-        notifyDataSetChanged()
     }
 
-//    fun setDataSet(array: ArrayList<Task>) {
-//        tasks = array
-//        notifyDataSetChanged()
-//    }
-//
-//    fun getDataSet(): ArrayList<Task> {
-//        return tasks
-//    }
-
     fun setFilter(position: Int) {
-//        Log.d("YEET2",  project.projectTasks.filter { s -> s.currentStatus == position }.size.toString())
-//        project.projectTasks.filter { s -> s.currentStatus == position }.size
         itemFilter = position
         notifyDataSetChanged()
     }
 
 
     private fun editItem(position: Int, task: TaskObject) {
-//        tasks[position].name = task.name
-//        tasks[position].assignedTo = task.assignedTo
-//        tasks[position].urgency = task.urgency
+        tasksRef
+                .document(project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].id)
+                .set(task)
         project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].name = task.name
         project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].assignedTo = task.assignedTo
         project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].urgency = task.urgency
@@ -98,7 +76,6 @@ class ProjectAdapter(
     }
 
     private fun remove(position: Int){
-//        tasks.removeAt(position)
         project.projectTasks.removeAt(position)
         notifyItemRemoved(position)
     }
@@ -125,9 +102,6 @@ class ProjectAdapter(
 
         if(position != -1)
         {
-//            view.edit_text_task_name.setText(tasks[position].name)
-//            view.edit_text_assign_description.setText(tasks[position].assignedTo)
-//            view.edit_text_urgency_description.setText(tasks[position].urgency.toString())
             view.edit_text_task_name.setText(project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].name)
             view.edit_text_assign_description.setText(project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].assignedTo)
             view.edit_text_urgency_description.setText(project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].urgency.toString())
@@ -150,6 +124,7 @@ class ProjectAdapter(
                 project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours = project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours + hours
 
                 project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog.add("Logged hours $hours Total Hours: ${project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours}")
+                editItem(position, project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position])
                 recyclerViewAdapter.notifyDataSetChanged()
                 view.edit_text_log_hours.setText("")
             }
@@ -170,15 +145,9 @@ class ProjectAdapter(
                     view.edit_text_assign_description.text.toString(),
                     urgancy,
                     view.spinner_task.selectedItemPosition,
-                    0.0
+                    0.0,
+                    arrayList
                 )
-//                val task = Task(view.edit_text_task_name.text.toString(),
-//                        view.edit_text_assign_description.text.toString(),
-//                        urgancy,
-//                        view.spinner_task.selectedItemPosition,
-//                        0.0,
-//                        arrayList
-//                )
                 add(task)
             }
             else
@@ -193,7 +162,7 @@ class ProjectAdapter(
                     urgancy,
                     view.spinner_task.selectedItemPosition,
                     project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours,
-//                  project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog
+                  project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog
                 )
                 editItem(position, task)
                 recyclerViewAdapter?.notifyDataSetChanged()

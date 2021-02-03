@@ -18,7 +18,7 @@ import kotlinx.android.synthetic.main.create_project_modal.view.*
 
 class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener) : RecyclerView.Adapter<NavDrawerHolder>() {
     private var teams : ArrayList<TeamObject> = ArrayList()
-    var projects = HashMap<String, ArrayList<ProjectObject>>()
+//    var projects = HashMap<String, ArrayList<ProjectObject>>()
 
     private val teamsRef = FirebaseFirestore
         .getInstance()
@@ -41,8 +41,8 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
                     val team = TeamObject.fromSnapshot(teamChange.document)
                     when(teamChange.type) {
                         DocumentChange.Type.ADDED -> {
+                            getProjectsFromIDs(team.projectReferences, team)
                             teams.add(0, team)
-                            projects[teams[0].teamName] = ArrayList()
                             notifyItemInserted(0)
                         }
                         DocumentChange.Type.REMOVED -> {
@@ -60,19 +60,18 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
                     }
                 }
             }
-        teams.clear()
-        teamsRef.get().addOnSuccessListener { snapshot2: QuerySnapshot ->
-            for(doc in 0 until snapshot2.size()){
-                //Get Team DOC
-                val tm = TeamObject.fromSnapshot(snapshot2.documents[snapshot2.size() - doc - 1]) //Converts Firebase to TeamObject
-//                teams.add(tm) //Add team to list
-                projects[tm.teamName] = ArrayList() //Add empty proj list to map with team names
-
-                //Get Projects
-                getProjectsFromIDs(tm.projectReferences, tm)
-            }
-            notifyDataSetChanged()
-        }
+//        teams.clear()
+//        teamsRef.get().addOnSuccessListener { snapshot2: QuerySnapshot ->
+//            for(doc in 0 until snapshot2.size()){
+//                //Get Team DOC
+//                val tm = TeamObject.fromSnapshot(snapshot2.documents[snapshot2.size() - doc - 1]) //Converts Firebase to TeamObject
+////                projects[tm.teamName] = ArrayList() //Add empty proj list to map with team names
+//
+//                //Get Projects
+//                getProjectsFromIDs(tm.projectReferences, tm)
+//            }
+//            notifyDataSetChanged()
+//        }
     }
 
     private fun deleteProjectReferences(projectReferences: ArrayList<String>) {
@@ -82,9 +81,9 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
     }
 
     private fun getProjectsFromIDs(projIds : ArrayList<String>, tm : TeamObject) {
+//    private fun getProjectsFromIDs(position: Int) {
         //Get top level projects reference from firebase
         //loop over ids and match with documents from projects reference, then convert and add to lists
-//        Log.d("TEST", projIds.toString())
         projectsRef
 //                .whereEqualTo("id", projIds)
                 .addSnapshotListener {snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
@@ -94,14 +93,13 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
                     }
                     for(projChange in snapshot!!.documentChanges) {
                         val po = ProjectObject.fromSnapshot(projChange.document)
+//                        Log.d("TEST", teams[position].teamName)
                         if(projIds.contains(po.id)) {
                             when (projChange.type) {
                                 DocumentChange.Type.ADDED -> {
-                                    tm.projects.add(0, po)
-//                                projects[teams[0].teamName] = ArrayList()
-                                    projects[tm.teamName]?.add(po)
+                                    Log.d("TEST", po.projectTitle)
                                     getTasksFromIDs(po.taskReferences, po)
-//                                notifyItemInserted(0)
+                                    tm.projects.add(0, po)
                                     notifyDataSetChanged()
                                 }
                                 DocumentChange.Type.REMOVED -> {
@@ -112,28 +110,16 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
                                 }
                                 DocumentChange.Type.MODIFIED -> {
                                     val pos = tm.projects.indexOfFirst { po.id == it.id }
-                                    tm.projects.add(po)
+                                    tm.projects[pos] = po
 //                                getProjectsFromIDs(team.projectReferences, team)
                                     getTasksFromIDs(po.taskReferences, po)
-//                                notifyItemChanged(pos)
-                                    notifyDataSetChanged()
+                                    notifyItemChanged(pos)
+//                                    notifyDataSetChanged()
                                 }
                             }
                         }
                     }
                 }
-//        for (projId in projIds) {
-//            projectsRef.document(projId).get().addOnSuccessListener{ snapshot: DocumentSnapshot ->
-//                //Add Project to team
-//                val po = ProjectObject.fromSnapshot(snapshot)
-//                tm.projects.add(po)
-//                projects[tm.teamName]?.add(po)
-//
-//                //Get tasks
-//                getTasksFromIDs(po.taskReferences, po)
-//                notifyDataSetChanged()
-//            }
-//        }
     }
 
     private fun getTasksFromIDs(ids : ArrayList<String>, po : ProjectObject) {
@@ -210,15 +196,15 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
     }
 
     fun editTeamAtPosition(position: Int, teamName: String, teamDescription: String,
-                           members: ArrayList<MemberObject>, projects: ArrayList<ProjectObject>){
+                           members: ArrayList<MemberObject>){
         //Todo: Complete edit team
-//        teams[position].teamName = teamName
-//        teams[position].teamDescription = teamDescription
+        teams[position].teamName = teamName
+        teams[position].teamDescription = teamDescription
 //        teams[position].members = members
 //        teams[position].projects = projects
 //        this.projects[teams[position].teamName] = projects
 
-//        teamRef.document(teams[position].id).set(teams[position])
+        teamsRef.document(teams[position].id).set(teams[position])
 //        notifyItemChanged(position)
     }
 

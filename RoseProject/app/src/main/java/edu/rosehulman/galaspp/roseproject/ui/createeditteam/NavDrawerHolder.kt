@@ -60,7 +60,10 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
 
         listDataChild = HashMap()
         val projectNames: MutableList<String> = ArrayList()
-        for(p in adapter.projects[team.teamName]!!){
+//        for(p in adapter.projects[team.teamName]!!){
+//            projectNames.add(p.projectTitle)
+//        }
+        for(p in team.projects){
             projectNames.add(p.projectTitle)
         }
 
@@ -73,12 +76,15 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
 
         //Adjust size based on # of projects in view and if group is expanded
         val card : CardView = view.drawer_card_view
-        val numProjects = adapter.projects[team.teamName]?.size
+//        val numProjects = adapter.projects[team.teamName]?.size
+        val numProjects = team.projects.size
         //Add on click listeners to adjust size
         expListView.setOnGroupExpandListener {
 //            Log.d("test", "You expanded the thing!")
+//            card.layoutParams.height = DEFAULT_HEIGHT +
+//                    expListView[0].height * numProjects!!
             card.layoutParams.height = DEFAULT_HEIGHT +
-                    expListView[0].height * numProjects!!
+                    expListView[0].height * numProjects
         }
         expListView.setOnGroupCollapseListener {
 //            Log.d("test", "You collapsed the thing!")
@@ -88,8 +94,10 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         expListView.setOnChildClickListener { parent, v, groupPosition, childPosition, id ->
             val childName = listAdapter.getChild(groupPosition, childPosition).toString()
             Log.d("test", "You clicked on project $childName!")
-            val project = adapter.projects[team.teamName]!![childPosition]
-            val projectName = adapter.projects[team.teamName]!![childPosition].projectTitle
+//            val project = adapter.projects[team.teamName]!![childPosition]
+            val project = team.projects[childPosition]
+//            val projectName = adapter.projects[team.teamName]!![childPosition].projectTitle
+            val projectName = team.projects[childPosition].projectTitle
             (context as FragmentListener)
                 .openFragment(ProjectFragment.newInstance(project), true, projectName)
             false
