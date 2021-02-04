@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     lateinit var authStateListener: FirebaseAuth.AuthStateListener
     // Request code for launching the sign in Intent.
     private val RC_SIGN_IN = 1
-
+//
     override lateinit var fab: FloatingActionButton
     private lateinit var appBar : AppBarLayout
 
