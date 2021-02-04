@@ -1,28 +1,24 @@
 package edu.rosehulman.galaspp.roseproject
 
-import android.opengl.Visibility
 import android.os.Bundle
-import android.renderscript.Script
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.view.View.GONE
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.LinearLayoutManager
-import edu.rosehulman.galaspp.roseproject.ui.LaunchFragment
+import com.firebase.ui.auth.AuthUI
+import com.google.android.material.appbar.AppBarLayout
+import com.google.firebase.auth.FirebaseAuth
+import edu.rosehulman.galaspp.roseproject.ui.SplashFragment
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.CreateEditTeamAdapter
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.NavDrawerAdapter
@@ -33,14 +29,20 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
 import kotlinx.android.synthetic.main.create_team_modal.view.*
 
-class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener, FragmentListener {
-
-//    private lateinit var appBarConfiguration: AppBarConfiguration
+class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
+        FragmentListener , SplashFragment.OnLoginButtonPressedListener,
+        AuthenticationListener
+{
+    // Done: Create instance of FirebaseAuth and an AuthStateListener
+    private val auth = FirebaseAuth.getInstance()
+    lateinit var authStateListener: FirebaseAuth.AuthStateListener
+    // Request code for launching the sign in Intent.
+    private val RC_SIGN_IN = 1
 
     override lateinit var fab: FloatingActionButton
+    private lateinit var appBar : AppBarLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,10 +51,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener, 
         setSupportActionBar(toolbar)
 
         fab = findViewById(R.id.fab)
-//        fab.setOnClickListener { view ->
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null).show()
-//        }
 
         //Navigation Drawer Start
         //https://www.droidcon.com/news-detail?content-id=/repository/collaboration/Groups/spaces/droidcon_hq/Documents/public/news/android-news/Android%20Material%20Component!%20An%20easy%20approach%20to%20Navigation%20Drawer%20(Part%20I)
@@ -61,7 +59,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener, 
         drawer_layout.addDrawerListener(drawerToggle)
         drawerToggle.syncState()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
 
         val drawerRecyclerView = nav_view.recycler_view_nav_drawer
         val adapter = NavDrawerAdapter(nav_view.context, this)
@@ -72,10 +69,14 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener, 
         create_new_team_button.setOnClickListener{
             showCreateOrEditTeamModal(-1, adapter)
         }
-        //Navigation Drawer End
+
+        //Setup
+        appBar = app_bar_view
         app_bar_view.isVisible = false
+        ProfileFragment.listener = this
         fab.hide()
-        openFragment(LaunchFragment(app_bar_view), false, "sign_in")
+
+        initializeListeners()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -112,6 +113,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener, 
     }
 
     override fun openFragment(fragment: Fragment, addToBackStack: Boolean, name: String){
+        appBar.isVisible = true
         drawer_layout.closeDrawer(GravityCompat.START)
         val ft = supportFragmentManager.beginTransaction()
         ft.replace(R.id.fragment_container, fragment)
@@ -230,5 +232,71 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener, 
             adapter.removeName(view.edit_text_member_username.text.toString())
         }
         builder.create().show()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        auth.addAuthStateListener(authStateListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        auth.removeAuthStateListener(authStateListener)
+    }
+
+    private fun initializeListeners() {
+        // TODO: Create an AuthStateListener that passes the UID
+        // to the MovieQuoteFragment if the user is logged in
+        // and goes back to the Splash fragment otherwise.
+        // See https://firebase.google.com/docs/auth/users#the_user_lifecycle
+        authStateListener = FirebaseAuth.AuthStateListener { auth: FirebaseAuth ->
+            val user = auth.currentUser
+            Log.d(Constants.TAG, "In auth listener, User: $user")
+            if (user != null) {
+                Log.d(Constants.TAG, "UID: ${user.uid}")
+                Log.d(Constants.TAG, "Name: ${user.displayName}")
+                Log.d(Constants.TAG, "Email: ${user.email}")
+                Log.d(Constants.TAG, "Phone: ${user.phoneNumber}")
+                Log.d(Constants.TAG, "Photo URL: ${user.photoUrl}")
+                // plus email, photoUrl, phoneNumber
+                //TODO: Store UID somewhere to use for other fragments
+//                switchToMovieQuoteFragment(user.uid)
+                openFragment(WelcomeFragment(), false, "welcome")
+                app_bar_view.isVisible = true
+            } else {
+                openFragment(SplashFragment(), false, "splash")
+                app_bar_view.isVisible = false
+            }
+        }
+
+    }
+
+    override fun onLoginButtonPressed() {
+        launchLoginUI()
+    }
+
+    private fun launchLoginUI() {
+        // DONE: Build a login intent and startActivityForResult(intent, ...)
+        // For details, see https://firebase.google.com/docs/auth/android/firebaseui#sign_in
+        // Choose authentication providers
+        val providers = arrayListOf(
+                AuthUI.IdpConfig.EmailBuilder().build(),
+                AuthUI.IdpConfig.PhoneBuilder().build(),
+                AuthUI.IdpConfig.GoogleBuilder().build()
+        )
+
+        val loginIntent = AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(providers)
+//                .setLogo(R.drawable.ic_launcher_custom)
+                .build()
+
+        // Create and launch sign-in intent
+        startActivityForResult(loginIntent, RC_SIGN_IN)
+    }
+
+    override fun signOut() {
+        appBar.isVisible = false
+        auth.signOut()
     }
 }

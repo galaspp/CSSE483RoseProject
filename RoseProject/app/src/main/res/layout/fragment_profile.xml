@@ -14,14 +14,15 @@
         android:src="@drawable/default_profile_img"
         android:layout_centerHorizontal="true"
         android:layout_above="@id/name_text_view"
-        />
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/name_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="40sp"
-        android:layout_centerInParent="true"
+        android:layout_above="@id/username_text_view"
+        android:layout_centerHorizontal="true"
         android:textStyle="bold"/>
 
     <TextView
@@ -29,16 +30,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"
-        android:layout_below="@id/name_text_view"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerInParent="true"/>
 
     <TextView
         android:id="@+id/membership_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Team Membership"
+        android:text="@string/team_membership"
         android:textSize="20sp"
-        android:layout_marginTop="20dp"
         android:layout_marginStart="40dp"
         android:layout_below="@id/username_text_view"
         />
@@ -52,12 +51,14 @@
         android:layout_below="@id/membership_text_view"
         android:background="#eee"/>
 
+    <Button
+        android:id="@+id/logout_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/logout"
+        android:textSize="24sp"
+        android:layout_below="@id/profile_recycler_view"
+        android:layout_marginTop="35dp"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>
-<!--<include-->
-<!--layout="@layout/profile_recycler_view"-->
-<!--android:layout_width="330dp"-->
-<!--android:layout_height="200dp"-->
-<!--android:layout_centerHorizontal="true"-->
-<!--android:layout_below="@id/membership_text_view"-->
-<!--    />-->

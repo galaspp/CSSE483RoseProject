@@ -18,7 +18,7 @@ class CreateEditTeamHolder: RecyclerView.ViewHolder {
 
     fun bind(textofitem: MemberObject) {
         textView.text = textofitem.userName
-        permissionsView.text = textofitem.permissions
+//        permissionsView.text = textofitem.permissions
         view.setBackgroundColor(view.resources.getColor(R.color.backgroundcolor))
     }
 }

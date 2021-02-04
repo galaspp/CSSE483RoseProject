@@ -51,12 +51,12 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
+//    @RequiresApi(Build.VERSION_CODES.Q)
     fun bind(team: TeamObject){
         expListView = view.findViewById(R.id.expandable_list_view) as ExpandableListView
         // preparing list data
         listDataHeader = ArrayList()
-        (listDataHeader as ArrayList<String>).add("       " + team.teamName)
+        (listDataHeader as ArrayList<String>).add("       " + team.teamName)//TODO: fix spacing
 
         listDataChild = HashMap()
         val projectNames: MutableList<String> = ArrayList()

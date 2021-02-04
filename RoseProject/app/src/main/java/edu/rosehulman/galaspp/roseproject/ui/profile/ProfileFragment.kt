@@ -1,12 +1,15 @@
 package edu.rosehulman.galaspp.roseproject.ui.profile
 
+import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import edu.rosehulman.galaspp.roseproject.AuthenticationListener
+import edu.rosehulman.galaspp.roseproject.FragmentListener
 import edu.rosehulman.galaspp.roseproject.R
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
@@ -19,7 +22,9 @@ class ProfileFragment : Fragment() {
     private var profile: ProfileModel? = null
     private lateinit var adapter: ProfileAdapter
 
+
     companion object {
+        var listener: AuthenticationListener? = null
         @JvmStatic
         fun newInstance(profile: ProfileModel) =
                 ProfileFragment().apply {
@@ -32,7 +37,7 @@ class ProfileFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            profile = it.getParcelable<ProfileModel>(ARG_PROFILE)
+            profile = it.getParcelable(ARG_PROFILE)
         }
     }
 
@@ -44,16 +49,16 @@ class ProfileFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        //Populate
+        //Populate fields
         view.name_text_view.text = profile?.name
         view.username_text_view.text = profile?.username
 
-//        val recycleView = inflater.inflate(R.layout.profile_recycler_view, container, false) as RecyclerView
-//        adapter = ProfileAdapter(context)
-//        recycleView.layoutManager = LinearLayoutManager(context)
-//        recycleView.setHasFixedSize(true)
-//        recycleView.adapter = adapter
+        //Set listener for logout button
+        view.logout_button.setOnClickListener {
+            showSignOutDialog(context)
+        }
 
+        //Create recycler view for list of teams
         val recyclerView = view.findViewById<RecyclerView>(R.id.profile_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.setHasFixedSize(true)
@@ -62,4 +67,15 @@ class ProfileFragment : Fragment() {
 
         return view
     }
+
+    private fun showSignOutDialog(context : Context?) {
+        val builder = AlertDialog.Builder(context!!)
+        builder.setTitle(R.string.logout_confirmation)
+        builder.setNeutralButton("NO") { _, _ -> }
+        builder.setPositiveButton("YES") { _, _ ->
+            listener?.signOut()
+        }
+        builder.show()
+    }
+
 }
