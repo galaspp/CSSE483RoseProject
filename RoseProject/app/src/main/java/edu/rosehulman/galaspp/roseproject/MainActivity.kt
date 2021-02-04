@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
@@ -17,10 +18,13 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import edu.rosehulman.galaspp.roseproject.ui.SplashFragment
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.CreateEditTeamAdapter
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
+import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.NavDrawerAdapter
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.TeamObject
 import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileFragment
@@ -30,6 +34,7 @@ import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.create_team_modal.view.*
+import java.lang.NullPointerException
 
 class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         FragmentListener , SplashFragment.OnLoginButtonPressedListener,
@@ -40,9 +45,16 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     lateinit var authStateListener: FirebaseAuth.AuthStateListener
     // Request code for launching the sign in Intent.
     private val RC_SIGN_IN = 1
-//
+
+    private val membersRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.MEMBER_COLLECTION)
+
     override lateinit var fab: FloatingActionButton
     private lateinit var appBar : AppBarLayout
+
+    lateinit var userID: String
+    lateinit var userObject: MemberObject
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -150,13 +162,22 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         recyclerView.setHasFixedSize(true)
 
         view.create_team_add_members_modal.setOnClickListener{
-            showAddRemoveMemberModal(adapter)
+            showAddRemoveMemberModal(adapter, view)
         }
 
         if(position != -1)
         {
             view.edit_text_team_name.setText(adapterNav.getTeamDetails(position).teamName)
             view.edit_text_team_description.setText(adapterNav.getTeamDetails(position).teamDescription)
+            membersRef.get().addOnSuccessListener {
+                for(snapshot in it)
+                {
+                    if(adapterNav.getTeamDetails(position).teamMemberReferences.contains(snapshot.id))
+                    {
+                        adapter.addMember(MemberObject.fromSnapshot(snapshot), snapshot.id)
+                    }
+                }
+            }
 //            adapter.setListOfMembers(adapterNav.getTeamDetails(position).members)
 //            adapter.setListOfMembers(adapterNav.getTeamDetails(position).members)
         }
@@ -165,12 +186,10 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
             //TODO: Create or Update Team Here
             if(position == -1)
             {
-//                adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString(),
-//                    view.edit_text_team_description.text.toString(),
-//                    adapter.getListOfMembers()
-//                        ))
+
                 adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString(),
-                    view.edit_text_team_description.text.toString()
+                    view.edit_text_team_description.text.toString(),
+                    adapter.getMemberObjectIds()
                 ))
             }
             else
@@ -178,7 +197,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 adapterNav.editTeamAtPosition(position,
                         view.edit_text_team_name.text.toString(),
                         view.edit_text_team_description.text.toString(),
-                        adapter.getListOfMembers()
+                        adapter.getMemberObjectIds()
                 )
             }
 
@@ -189,26 +208,8 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         builder.create().show()
     }
 
-    private fun showCreateProjectModal()
-    {
-        val builder = AlertDialog.Builder(this)
-        //TODO: Change title based on whether editing or creating Project
-        //TODO: Prepopulate items as needed
-        builder.setTitle("Create Project? (Admin Only)")
 
-        val view = LayoutInflater.from(this).inflate(R.layout.create_project_modal, null, false)
-        builder.setView(view)
-
-        builder.setPositiveButton("Save") { _, _ ->
-
-        }
-
-        builder.setNegativeButton(android.R.string.cancel, null)
-
-        builder.create().show()
-    }
-
-    private fun showAddRemoveMemberModal(adapter: CreateEditTeamAdapter)
+    private fun showAddRemoveMemberModal(adapter: CreateEditTeamAdapter, addTeamView: View)
     {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Add/Remove Member")
@@ -223,7 +224,21 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         view.userPermissionSpinner.adapter = aa
 
         builder.setPositiveButton(R.string.add) { _, _ ->
-            adapter.addName(view.edit_text_member_username.text.toString(), view.userPermissionSpinner.selectedItem.toString())
+            membersRef
+                    .whereEqualTo("name", view.edit_text_member_username.text.toString())
+                    .get()
+                    .addOnSuccessListener {
+                        if(!it.isEmpty)
+                        {
+//                            adapter.addName(view.edit_text_member_username.text.toString(), view.userPermissionSpinner.selectedItem.toString())
+                            adapter.addMember(MemberObject.fromSnapshot(it.documents[0]), it.documents[0].id)
+                        }
+                        else
+                        {
+                            Snackbar.make(addTeamView, "User ${view.edit_text_member_username.text} does not exist", Snackbar.LENGTH_LONG).show()
+                        }
+
+            }
         }
 
         builder.setNeutralButton(android.R.string.cancel, null)
@@ -258,6 +273,26 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 Log.d(Constants.TAG, "Email: ${user.email}")
                 Log.d(Constants.TAG, "Phone: ${user.phoneNumber}")
                 Log.d(Constants.TAG, "Photo URL: ${user.photoUrl}")
+
+                userID = user.uid
+                membersRef
+                        .whereEqualTo("id", user.uid)
+                        .get()
+                        .addOnSuccessListener {
+                            if(it.isEmpty)
+                            {
+                                val newMember = user.displayName?.let { it1 -> MemberObject(it1, it1,  user.uid) }
+                                if (newMember != null) {
+                                    membersRef.add(newMember)
+                                    userObject = newMember
+                                }
+                            }
+                            else
+                            {
+                                userObject = MemberObject.fromSnapshot(it.documents[0])
+                            }
+                        }
+
                 // plus email, photoUrl, phoneNumber
                 //TODO: Store UID somewhere to use for other fragments
 //                switchToMovieQuoteFragment(user.uid)

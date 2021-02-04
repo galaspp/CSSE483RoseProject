@@ -28,6 +28,9 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
     private val tasksRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.TASKS_COLLECTION)
+    private val memberRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.MEMBER_COLLECTION)
 
     init {
         teamsRef
@@ -204,11 +207,11 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
     }
 
     fun editTeamAtPosition(position: Int, teamName: String, teamDescription: String,
-                           members: ArrayList<MemberObject>){
+                           members: ArrayList<String>){
         //Todo: Complete edit team
         teams[position].teamName = teamName
         teams[position].teamDescription = teamDescription
-//        teams[position].members = members
+        teams[position].teamMemberReferences = members
 //        teams[position].projects = projects
 //        this.projects[teams[position].teamName] = projects
 

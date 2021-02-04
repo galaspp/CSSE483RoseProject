@@ -9,6 +9,7 @@ import edu.rosehulman.galaspp.roseproject.ui.project.ProjectObject
 
 class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateEditTeamHolder>() {
     private var listofusernames : ArrayList<MemberObject> = ArrayList()
+    private var listOfIds : ArrayList<String> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CreateEditTeamHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.create_edit_team_card_view, parent, false)
@@ -36,6 +37,18 @@ class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateE
     fun setListOfMembers(list: ArrayList<MemberObject>) {
         listofusernames = list
         notifyDataSetChanged()
+    }
+
+    fun addMember(memberObject: MemberObject, memberObjectID: String )
+    {
+        listofusernames.add(0, memberObject)
+        listOfIds.add(memberObjectID)
+        notifyItemInserted(0)
+    }
+
+    fun getMemberObjectIds() :ArrayList<String>
+    {
+        return listOfIds
     }
 
     fun removeName(name: String)

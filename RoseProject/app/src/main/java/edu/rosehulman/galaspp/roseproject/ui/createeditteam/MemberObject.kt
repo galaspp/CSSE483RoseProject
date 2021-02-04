@@ -7,10 +7,11 @@ import com.google.firebase.firestore.Exclude
 data class MemberObject(
         var userName : String = "",
         var name : String = "",
-        var teamsReferences : ArrayList<String> = ArrayList(),
-        var statuses : Map<String, String> = mapOf(),
         var id : String = ""
+//        var teamsReferences : ArrayList<String> = ArrayList(),
+//        var statuses : Map<String, String> = mapOf(),
 ) {
+//    @get: Exclude var id = ""
     @get: Exclude var teams = ArrayList<TeamObject>()
     companion object{
         fun fromSnapshot(snapshot: DocumentSnapshot): MemberObject {

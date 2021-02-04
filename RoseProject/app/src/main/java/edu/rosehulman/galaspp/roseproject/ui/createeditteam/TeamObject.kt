@@ -10,6 +10,7 @@ import edu.rosehulman.galaspp.roseproject.ui.project.ProjectObject
 data class TeamObject(
     var teamName: String = "",
     var teamDescription: String = "",
+    var teamMemberReferences: ArrayList<String> = ArrayList(),
     var projectReferences: ArrayList<String> = ArrayList()
 ) {
     @get: Exclude var projects = ArrayList<ProjectObject>()

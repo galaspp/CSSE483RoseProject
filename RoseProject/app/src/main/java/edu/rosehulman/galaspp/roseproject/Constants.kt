@@ -5,6 +5,7 @@ object Constants {
     var TEAMS_COLLECTION = "teams_col"
     var PROJECTS_COLLECTION = "projects_col"
     var TASKS_COLLECTION = "tasks_col"
+    var MEMBER_COLLECTION = "members_col"
 
     var MEMBERS_FIELD = "members"
     var PROJECTS_FIELD = "projectReferences"
