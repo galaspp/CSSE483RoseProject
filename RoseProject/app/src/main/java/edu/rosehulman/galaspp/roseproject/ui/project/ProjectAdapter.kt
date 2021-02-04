@@ -76,7 +76,14 @@ class ProjectAdapter(
     }
 
     private fun remove(position: Int){
+        val taskId = project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].id
         project.projectTasks.removeAt(position)
+        tasksRef
+                .document(taskId)
+                .delete()
+                .addOnSuccessListener {
+                    projectsRef.document(project.id).update("taskReferences", FieldValue.arrayRemove(taskId))
+                }
         notifyItemRemoved(position)
     }
 
@@ -171,6 +178,28 @@ class ProjectAdapter(
         }
 
         builder.setNegativeButton(android.R.string.cancel, null)
+
+        if(position != -1)
+        {
+            builder.setNeutralButton("Delete") { _,_ ->
+                confirmDeleteModal(position)
+            }
+        }
+
+        builder.create().show()
+    }
+
+    private fun confirmDeleteModal(position : Int)
+    {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(R.string.deleteTask)
+        builder.setMessage(R.string.deleteTaskMessage)
+
+        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+            remove(position)
+        }
+
+        builder.setNegativeButton(android.R.string.cancel, null) //Do Nothing
 
         builder.create().show()
     }

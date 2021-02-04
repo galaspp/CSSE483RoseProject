@@ -8,7 +8,6 @@ import android.widget.ExpandableListView
 import android.widget.PopupMenu
 import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.FragmentListener
@@ -60,9 +59,7 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
 
         listDataChild = HashMap()
         val projectNames: MutableList<String> = ArrayList()
-//        for(p in adapter.projects[team.teamName]!!){
-//            projectNames.add(p.projectTitle)
-//        }
+
         for(p in team.projects){
             projectNames.add(p.projectTitle)
         }
@@ -72,22 +69,17 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         //Set list adapter
         listAdapter = CustomExpandableListAdapter(context, listDataHeader, listDataChild)
         expListView.setAdapter(listAdapter)
-//        expListView.bottomEdgeEffectColor = ContextCompat.getColor(context, R.color.white)
 
         //Adjust size based on # of projects in view and if group is expanded
         val card : CardView = view.drawer_card_view
-//        val numProjects = adapter.projects[team.teamName]?.size
         val numProjects = team.projects.size
         //Add on click listeners to adjust size
         expListView.setOnGroupExpandListener {
-//            Log.d("test", "You expanded the thing!")
-//            card.layoutParams.height = DEFAULT_HEIGHT +
-//                    expListView[0].height * numProjects!!
+
             card.layoutParams.height = DEFAULT_HEIGHT +
                     expListView[0].height * numProjects
         }
         expListView.setOnGroupCollapseListener {
-//            Log.d("test", "You collapsed the thing!")
             card.layoutParams.height = DEFAULT_HEIGHT
         }
 
@@ -101,6 +93,11 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
             (context as FragmentListener)
                 .openFragment(ProjectFragment.newInstance(project), true, projectName)
             false
+        }
+
+        expListView.setOnItemLongClickListener { parent, view, position, id ->
+            adapter.showCreateProjectModal(adapterPosition, position - 1, team.projects)
+            true
         }
     }
 }
