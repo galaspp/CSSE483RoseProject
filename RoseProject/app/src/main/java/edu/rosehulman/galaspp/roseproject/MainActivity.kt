@@ -9,7 +9,6 @@ import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
@@ -18,12 +17,14 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import edu.rosehulman.galaspp.roseproject.ui.SplashFragment
-import edu.rosehulman.galaspp.roseproject.ui.createeditteam.CreateEditTeamAdapter
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
+import edu.rosehulman.galaspp.roseproject.ui.createeditteam.CreateEditTeamAdapter
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.NavDrawerAdapter
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.TeamObject
@@ -34,7 +35,7 @@ import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.create_team_modal.view.*
-import java.lang.NullPointerException
+
 
 class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         FragmentListener , SplashFragment.OnLoginButtonPressedListener,
@@ -81,6 +82,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         create_new_team_button.setOnClickListener{
             showCreateOrEditTeamModal(-1, adapter)
         }
+
 
         //Setup
         appBar = app_bar_view
@@ -137,12 +139,10 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         showCreateOrEditTeamModal(position, adapter)
     }
 
-
     private fun showCreateOrEditTeamModal(position: Int = -1, adapterNav: NavDrawerAdapter)
     {
         val builder = AlertDialog.Builder(this)
-        //TODO: Change title based on whether editing or creating team
-        //TODO: Prepopulate items as needed
+        //DONE: Prepopulate items as needed
         if(position != -1) {
             builder.setTitle("Edit Team?")
         }
@@ -153,7 +153,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         val view = LayoutInflater.from(this).inflate(R.layout.create_team_modal, null, false)
         builder.setView(view)
 
-        //TODO: Add Recycler View Layout
+        //DONE: Add Recycler View Layout
         //Maybe add to a different file
         val recyclerView = view.create_edit_team_recycler_view
         val adapter = CreateEditTeamAdapter(this)
@@ -183,71 +183,69 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         }
 
         builder.setPositiveButton("Save") { _, _ ->
-            //TODO: Create or Update Team Here
-            if(position == -1)
-            {
-
+            //DONE: Create or Update Team Here
+            if(position == -1){
                 adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString(),
-                    view.edit_text_team_description.text.toString(),
-                    adapter.getMemberObjectIds()
+                        view.edit_text_team_description.text.toString(),
+                        adapter.getMemberObjectIds()
                 ))
             }
-            else
-            {
+            else{
                 adapterNav.editTeamAtPosition(position,
                         view.edit_text_team_name.text.toString(),
                         view.edit_text_team_description.text.toString(),
                         adapter.getMemberObjectIds()
                 )
             }
-
         }
-
         builder.setNegativeButton(android.R.string.cancel, null)
-
         builder.create().show()
     }
 
 
-    private fun showAddRemoveMemberModal(adapter: CreateEditTeamAdapter, addTeamView: View)
-    {
+    private fun showAddRemoveMemberModal(adapter: CreateEditTeamAdapter, addTeamView: View){
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Add/Remove Member")
-
         val view = LayoutInflater.from(this).inflate(R.layout.add_remove_members_modal, null, false)
         builder.setView(view)
 
-        //TODO: Add Spinner
+        //Set Autocomplete
+        val autoAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.select_dialog_item, getMembers())
+        view.edit_text_member_username.threshold = 1
+        view.edit_text_member_username.setAdapter(autoAdapter)
+
         val arrayVal = resources.getStringArray(R.array.member_Permissions)
         val aa = ArrayAdapter(view.context, android.R.layout.simple_spinner_item, arrayVal)
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         view.userPermissionSpinner.adapter = aa
 
         builder.setPositiveButton(R.string.add) { _, _ ->
-            membersRef
-                    .whereEqualTo("name", view.edit_text_member_username.text.toString())
-                    .get()
+            membersRef.whereEqualTo("name", view.edit_text_member_username.text.toString()).get()
                     .addOnSuccessListener {
-                        if(!it.isEmpty)
-                        {
-//                            adapter.addName(view.edit_text_member_username.text.toString(), view.userPermissionSpinner.selectedItem.toString())
+                        if(!it.isEmpty){
                             adapter.addMember(MemberObject.fromSnapshot(it.documents[0]), it.documents[0].id)
                         }
-                        else
-                        {
+                        else{
                             Snackbar.make(addTeamView, "User ${view.edit_text_member_username.text} does not exist", Snackbar.LENGTH_LONG).show()
                         }
-
             }
         }
-
         builder.setNeutralButton(android.R.string.cancel, null)
-
         builder.setNegativeButton("Remove") { _, _ ->
             adapter.removeName(view.edit_text_member_username.text.toString())
         }
         builder.create().show()
     }
+
+    private fun getMembers() : ArrayList<String> {
+        //Access members reference and extract name of each user, return in array
+        val ret = ArrayList<String>()
+        membersRef.get().addOnSuccessListener { snapshot : QuerySnapshot ->
+            for (doc in snapshot) ret.add(MemberObject.fromSnapshot(doc).name)
+        }
+        return ret
+    }
+
 
     override fun onStart() {
         super.onStart()
@@ -260,7 +258,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     }
 
     private fun initializeListeners() {
-        // TODO: Create an AuthStateListener that passes the UID
+        // DONE: Create an AuthStateListener that passes the UID
         // to the MovieQuoteFragment if the user is logged in
         // and goes back to the Splash fragment otherwise.
         // See https://firebase.google.com/docs/auth/users#the_user_lifecycle
@@ -281,7 +279,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                         .addOnSuccessListener {
                             if(it.isEmpty)
                             {
-                                val newMember = user.displayName?.let { it1 -> MemberObject(it1, it1,  user.uid) }
+                                val newMember = user.displayName?.let { it1 -> MemberObject(it1, it1, user.uid) }
                                 if (newMember != null) {
                                     membersRef.add(newMember)
                                     userObject = newMember
