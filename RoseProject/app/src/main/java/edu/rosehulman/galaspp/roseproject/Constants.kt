@@ -11,4 +11,6 @@ object Constants {
     var USERNAME_FIELD = "userName"
     var NAME_FIELD = "name"
 
+    var ROSE_STRING = "57215050-9bf1-44dc-828f-af0d36ec6f7e"
+
 }
