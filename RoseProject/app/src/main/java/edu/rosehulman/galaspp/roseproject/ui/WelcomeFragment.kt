@@ -5,23 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import edu.rosehulman.galaspp.roseproject.FragmentListener
-import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileAdapter
 import edu.rosehulman.galaspp.roseproject.R
+import kotlinx.android.synthetic.main.fragment_welcome.view.*
 
-class WelcomeFragment() : Fragment() {
+class WelcomeFragment(val name: String) : Fragment() {
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        if(context is FragmentListener) {
-//            (context as FragmentListener).fab.show()
-        }
-        return  inflater.inflate(R.layout.fragment_welcome, container, false)
+        val view = inflater.inflate(R.layout.fragment_welcome, container, false)
+
+        view.welcome_name_text_view.text = name
+
+        return view
     }
 }

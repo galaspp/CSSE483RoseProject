@@ -8,6 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="rosered">#800000</color>
+    <color name="red">#f00</color>
     <color name="backgroundcolor">#CACACA</color>
     <color name="diabledButtoncolor">#999</color>
 </resources>

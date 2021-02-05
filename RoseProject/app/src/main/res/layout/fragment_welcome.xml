@@ -11,7 +11,7 @@
         android:id="@+id/welcome_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome"
+        android:text="@string/welcome"
         android:textSize="40sp"
         android:layout_centerInParent="true"
         android:textStyle="bold"/>
@@ -19,7 +19,7 @@
         android:id="@+id/welcome_name_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Username"
+        android:text="@string/username"
         android:textSize="40sp"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/welcome_text_view"

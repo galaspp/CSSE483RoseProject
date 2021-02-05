@@ -14,7 +14,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
 import com.google.android.material.appbar.AppBarLayout
@@ -23,6 +22,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import edu.rosehulman.galaspp.roseproject.ui.NewUserFragment
 import edu.rosehulman.galaspp.roseproject.ui.SplashFragment
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.CreateEditTeamAdapter
@@ -36,7 +36,6 @@ import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.create_team_modal.view.*
-
 
 class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         FragmentListener , SplashFragment.OnLoginButtonPressedListener,
@@ -121,7 +120,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         val backStackSize = supportFragmentManager.backStackEntryCount
         if(backStackSize == 0 || supportFragmentManager.getBackStackEntryAt(backStackSize-1).name != "profile"){
             //Add profile fragment
-            val profileFragment = ProfileFragment.newInstance(profile)
+            val profileFragment = ProfileFragment.newInstance(profile, auth.currentUser!!.uid)
             val ft = supportFragmentManager.beginTransaction()
             ft.replace(R.id.fragment_container, profileFragment)
             ft.addToBackStack("profile")
@@ -136,6 +135,9 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         ft.replace(R.id.fragment_container, fragment)
         if(addToBackStack) ft.addToBackStack(name)
         ft.commit()
+    }
+    override fun removeCurrentFragment(){
+        onBackPressed()
     }
 
     override fun onEditTeamItemSelected(position: Int, adapter: NavDrawerAdapter) {
@@ -276,29 +278,23 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 Log.d(Constants.TAG, "Photo URL: ${user.photoUrl}")
 
                 userID = user.uid
-                membersRef
-                        .whereEqualTo("id", user.uid)
-                        .get()
-                        .addOnSuccessListener {
-                            if(it.isEmpty)
-                            {
-                                val newMember = user.displayName?.let { it1 -> MemberObject(it1, it1, user.uid) }
-                                if (newMember != null) {
-                                    membersRef.add(newMember)
-                                    userObject = newMember
-                                }
-                            }
-                            else
-                            {
-                                userObject = MemberObject.fromSnapshot(it.documents[0])
+                membersRef.whereEqualTo("id", user.uid).get().addOnSuccessListener {
+                    if(it.isEmpty){
+                        val newMember = user.displayName?.let { it1 -> MemberObject(it1, it1, user.uid) }
+                        if (newMember != null) {
+                            membersRef.document(user.uid).set(newMember).addOnSuccessListener {
+                                userObject = newMember
                             }
                         }
-
-                // plus email, photoUrl, phoneNumber
-                //TODO: Store UID somewhere to use for other fragments
-//                switchToMovieQuoteFragment(user.uid)
-                openFragment(WelcomeFragment(), false, "welcome")
-                app_bar_view.isVisible = true
+                        app_bar_view.isVisible = false
+                        openFragment(NewUserFragment(this, membersRef, user.uid, app_bar_view), false, "new user")
+                    } else {
+                        userObject = MemberObject.fromSnapshot(it.documents[0])
+                        app_bar_view.isVisible = true
+                        //TODO: Bug exists where back must be pressed before profile button
+                        openFragment(WelcomeFragment(userObject.userName), false, "welcome")
+                    }
+                }
             } else {
                 openFragment(SplashFragment(), false, "splash")
                 app_bar_view.isVisible = false
@@ -325,6 +321,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
 //                .setLogo(R.drawable.ic_launcher_custom)
+//                .setTheme(R.style.LoginTheme)
                 .build()
 
         // Create and launch sign-in intent

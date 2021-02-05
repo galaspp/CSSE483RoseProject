@@ -7,12 +7,8 @@ object Constants {
     var TASKS_COLLECTION = "tasks_col"
     var MEMBER_COLLECTION = "members_col"
 
-    var MEMBERS_FIELD = "members"
     var PROJECTS_FIELD = "projectReferences"
-    var TASKS_FIELD = "tasks"
-    var LOG_FIELD = "projectTaskLog"
-
-    var ID_DOC_FIELD = "IDs"
-    var LOG_DOC_FIELD = "Log"
+    var USERNAME_FIELD = "userName"
+    var NAME_FIELD = "name"
 
 }

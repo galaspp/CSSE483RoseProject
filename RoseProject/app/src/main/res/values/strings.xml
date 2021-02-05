@@ -10,7 +10,6 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
-    <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="enter_username">Enter Username</string>
     <string name="enter_password">Enter Password</string>
@@ -53,6 +52,17 @@
     <string name="project_title">Project Title</string>
     <string name="logout">Logout</string>
     <string name="team_membership">Team Membership</string>
+    <string name="welcome_to_rose_projects">Welcome to Rose Projects!</string>
+    <string name="info_prompt">Please enter in your information.</string>
+    <string name="first_name">First Name</string>
+    <string name="enter_your_first_name">Enter Your First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="username">Username</string>
+    <string name="enter_your_username">Enter Your Username</string>
+    <string name="enter_your_last_name">Enter Your Last Name</string>
+    <string name="choose_your_picture">Choose your picture</string>
+    <string name="done">Done</string>
+    <string name="welcome">Welcome</string>
 
     <string-array name="task_status_array">
         <item>Not Started</item>
