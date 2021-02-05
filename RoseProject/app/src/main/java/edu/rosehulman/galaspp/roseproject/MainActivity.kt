@@ -14,6 +14,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
 import com.google.android.material.appbar.AppBarLayout
@@ -117,7 +118,9 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     //adds one profile to backstack
     private fun openProfile(profile: ProfileModel){
         //Prevent multiple profiles being added to backstack
-        if(supportFragmentManager.backStackEntryCount == 0){
+        val backStackSize = supportFragmentManager.backStackEntryCount
+        if(backStackSize == 0 || supportFragmentManager.getBackStackEntryAt(backStackSize-1).name != "profile"){
+            //Add profile fragment
             val profileFragment = ProfileFragment.newInstance(profile)
             val ft = supportFragmentManager.beginTransaction()
             ft.replace(R.id.fragment_container, profileFragment)
