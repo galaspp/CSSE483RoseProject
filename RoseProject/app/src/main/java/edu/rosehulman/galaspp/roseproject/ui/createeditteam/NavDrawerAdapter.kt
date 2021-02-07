@@ -41,25 +41,25 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
                 }
                 for(teamChange in snapshot!!.documentChanges) {
                     val team = TeamObject.fromSnapshot(teamChange.document)
-                    when(teamChange.type) {
-                        DocumentChange.Type.ADDED -> {
-                            if(userObject?.teams?.contains(team)!!){
+                    if(userObject?.let { team.teamMemberReferences.contains(it.id) } == true) {
+                        when (teamChange.type) {
+                            DocumentChange.Type.ADDED -> {
                                 getProjectsFromIDs(team.projectReferences, team)
                                 teams.add(0, team)
                                 notifyItemInserted(0)
                             }
-                        }
-                        DocumentChange.Type.REMOVED -> {
-                            val pos = teams.indexOfFirst { team.id == it.id }
-                            deleteProjectReferences(team.projectReferences)
-                            teams.removeAt(pos)
-                            notifyItemRemoved(pos)
-                        }
-                        DocumentChange.Type.MODIFIED -> {
-                            val pos = teams.indexOfFirst{ team.id == it.id }
-                            teams[pos] = team
-                            getProjectsFromIDs(team.projectReferences, team)
-                            notifyItemChanged(pos)
+                            DocumentChange.Type.REMOVED -> {
+                                val pos = teams.indexOfFirst { team.id == it.id }
+                                deleteProjectReferences(team.projectReferences)
+                                teams.removeAt(pos)
+                                notifyItemRemoved(pos)
+                            }
+                            DocumentChange.Type.MODIFIED -> {
+                                val pos = teams.indexOfFirst { team.id == it.id }
+                                teams[pos] = team
+                                getProjectsFromIDs(team.projectReferences, team)
+                                notifyItemChanged(pos)
+                            }
                         }
                     }
                 }
@@ -77,7 +77,6 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
         //Get top level projects reference from firebase
         //loop over ids and match with documents from projects reference, then convert and add to lists
         projectsRef
-//                .whereEqualTo("id", projIds)
                 .addSnapshotListener {snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
                     if(exception != null) {
                         Log.e("Nav Drawer Error", "Listen Error: $exception")

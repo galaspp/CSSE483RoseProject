@@ -199,10 +199,16 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         builder.setPositiveButton("Save") { _, _ ->
             //DONE: Create or Update Team Here
             if(position == -1){
-                adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString(),
-                        view.edit_text_team_description.text.toString(),
-                        adapter.getMemberObjectIds()
-                ))
+                membersRef.whereEqualTo("id", userID).get().addOnSuccessListener {
+                    userObject = MemberObject.fromSnapshot(it.documents[0])
+                    val list = adapter.getMemberObjectIds()
+                    list.add(userObject.id)
+                    adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString(),
+                            view.edit_text_team_description.text.toString(),
+                            list
+                    ))
+                }
+
             }
             else{
                 adapterNav.editTeamAtPosition(position,
@@ -322,9 +328,9 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                     if(!userObject.teams.contains(team)){
                         userObject.teams.add(team)
                     }
-                    navAdapter.setup()
                 }
             }
+            navAdapter.setup()
         }
     }
 
