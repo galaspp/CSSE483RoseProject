@@ -1,5 +1,7 @@
 package edu.rosehulman.galaspp.roseproject
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,6 +22,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import edu.rosehulman.galaspp.roseproject.ui.NewUserFragment
@@ -30,7 +33,7 @@ import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.NavDrawerAdapter
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.TeamObject
 import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileFragment
-import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileModel
+import edu.rosehulman.rosefire.Rosefire
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.add_remove_members_modal.view.*
@@ -46,16 +49,22 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     lateinit var authStateListener: FirebaseAuth.AuthStateListener
     // Request code for launching the sign in Intent.
     private val RC_SIGN_IN = 1
+    private val RC_ROSEFIRE_LOGIN = 1001
+
 
     private val membersRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
+    private val teamsRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.TEAMS_COLLECTION)
 
     override lateinit var fab: FloatingActionButton
     private lateinit var appBar : AppBarLayout
 
     lateinit var userID: String
     lateinit var userObject: MemberObject
+    lateinit var navAdapter: NavDrawerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,13 +83,13 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val drawerRecyclerView = nav_view.recycler_view_nav_drawer
-        val adapter = NavDrawerAdapter(nav_view.context, this)
-        drawerRecyclerView.adapter = adapter
+        navAdapter = NavDrawerAdapter(nav_view.context, this, null)
+        drawerRecyclerView.adapter = navAdapter
         drawerRecyclerView.layoutManager = LinearLayoutManager(this)
         drawerRecyclerView.setHasFixedSize(true)
 
         create_new_team_button.setOnClickListener{
-            showCreateOrEditTeamModal(-1, adapter)
+            showCreateOrEditTeamModal(-1, navAdapter)
         }
 
 
@@ -107,7 +116,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
             }
             R.id.action_profile -> {
                 fab.hide()
-                openProfile(ProfileModel())
+                openProfile(userObject)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -115,7 +124,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     }
 
     //adds one profile to backstack
-    private fun openProfile(profile: ProfileModel){
+    private fun openProfile(profile: MemberObject){
         //Prevent multiple profiles being added to backstack
         val backStackSize = supportFragmentManager.backStackEntryCount
         if(backStackSize == 0 || supportFragmentManager.getBackStackEntryAt(backStackSize-1).name != "profile"){
@@ -135,6 +144,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         ft.replace(R.id.fragment_container, fragment)
         if(addToBackStack) ft.addToBackStack(name)
         ft.commit()
+//        Log.d(Constants.TAG, "Fragments: ${supportFragmentManager.fragments}")
     }
     override fun removeCurrentFragment(){
         onBackPressed()
@@ -150,8 +160,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         //DONE: Prepopulate items as needed
         if(position != -1) {
             builder.setTitle("Edit Team?")
-        }
-        else {
+        } else {
             builder.setTitle("Create Team?")
         }
 
@@ -251,7 +260,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         return ret
     }
 
-
     override fun onStart() {
         super.onStart()
         auth.addAuthStateListener(authStateListener)
@@ -276,60 +284,115 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 Log.d(Constants.TAG, "Email: ${user.email}")
                 Log.d(Constants.TAG, "Phone: ${user.phoneNumber}")
                 Log.d(Constants.TAG, "Photo URL: ${user.photoUrl}")
-
                 userID = user.uid
-                membersRef.whereEqualTo("id", user.uid).get().addOnSuccessListener {
+                membersRef.whereEqualTo("id", userID).get().addOnSuccessListener {
                     if(it.isEmpty){
-                        val newMember = user.displayName?.let { it1 -> MemberObject(it1, it1, user.uid) }
-                        if (newMember != null) {
-                            membersRef.document(user.uid).set(newMember).addOnSuccessListener {
-                                userObject = newMember
-                            }
+                        Log.d(Constants.TAG, "New User")
+                        val newMember = MemberObject("", user.displayName ?: "", userID)
+                        membersRef.document(userID).set(newMember).addOnSuccessListener {
+                            userObject = newMember
+                            addTeams(userObject, userID)
+                            app_bar_view.isVisible = false
+                            openFragment(NewUserFragment(this, userObject, app_bar_view), false, "new user")
                         }
-                        app_bar_view.isVisible = false
-                        openFragment(NewUserFragment(this, membersRef, user.uid, app_bar_view), false, "new user")
                     } else {
+                        Log.d(Constants.TAG, "Old User")
                         userObject = MemberObject.fromSnapshot(it.documents[0])
                         app_bar_view.isVisible = true
-                        //TODO: Bug exists where back must be pressed before profile button
                         openFragment(WelcomeFragment(userObject.userName), false, "welcome")
+                        navAdapter.userObject = userObject
                     }
+                    addTeams(userObject, userID)
                 }
             } else {
                 openFragment(SplashFragment(), false, "splash")
                 app_bar_view.isVisible = false
             }
         }
-
     }
 
-    override fun onLoginButtonPressed() {
-        launchLoginUI()
+    @Suppress("UNCHECKED_CAST")
+    private fun addTeams(userObject: MemberObject, uid : String) {
+        membersRef.document(uid).get().addOnSuccessListener {
+            val ids = (it[Constants.STATUSES_FIELD] as Map<String, String>).keys
+//            Log.d(Constants.TAG, ids.toString())
+            for (id in ids) {
+                teamsRef.document(id).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
+                    val team = TeamObject.fromSnapshot(snapshot)
+                    if(!userObject.teams.contains(team)){
+                        userObject.teams.add(team)
+                    }
+                    navAdapter.setup()
+                }
+            }
+        }
     }
 
-    private fun launchLoginUI() {
-        // DONE: Build a login intent and startActivityForResult(intent, ...)
-        // For details, see https://firebase.google.com/docs/auth/android/firebaseui#sign_in
-        // Choose authentication providers
-        val providers = arrayListOf(
-                AuthUI.IdpConfig.EmailBuilder().build(),
-                AuthUI.IdpConfig.PhoneBuilder().build(),
-                AuthUI.IdpConfig.GoogleBuilder().build()
-        )
+    @Suppress("CanBeVal")
+    override fun onLoginButtonPressed(providerType : Int) {
+        var loginIntent : Intent?
+        when (providerType){
+            Constants.PROVIDER_EMAIL -> {
+                loginIntent = AuthUI.getInstance()
+                    .createSignInIntentBuilder()
+                    .setAvailableProviders(arrayListOf(AuthUI.IdpConfig.EmailBuilder().build()))
+                    .setTheme(R.style.LoginTheme)
+                    .build()
+                startActivityForResult(loginIntent, RC_SIGN_IN)
+            }
+            Constants.PROVIDER_GOOGLE -> {
+                loginIntent = AuthUI.getInstance()
+                    .createSignInIntentBuilder()
+                    .setAvailableProviders(arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build()))
+                    .setTheme(R.style.LoginTheme)
+                    .build()
+                startActivityForResult(loginIntent, RC_SIGN_IN)
+            }
+            Constants.PROVIDER_ROSE -> {
+                loginIntent = Rosefire.getSignInIntent(this, Constants.ROSE_STRING)
+                startActivityForResult(loginIntent, RC_ROSEFIRE_LOGIN)
+            }
+            else -> loginIntent = null
+        }
+        if(loginIntent == null){
+            Log.e("Provider Error", "Authentication provider does not exist")
+        }
+    }
 
-        val loginIntent = AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-//                .setLogo(R.drawable.ic_launcher_custom)
-//                .setTheme(R.style.LoginTheme)
-                .build()
-
-        // Create and launch sign-in intent
-        startActivityForResult(loginIntent, RC_SIGN_IN)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == RC_ROSEFIRE_LOGIN) {
+            val result = Rosefire.getSignInResultFromIntent(data)
+//            if (!result.isSuccessful) {
+//                // The user cancelled the login
+//                var dummyvar = -1
+//            }
+            FirebaseAuth.getInstance().signInWithCustomToken(result.token)
+//                .addOnCompleteListener(this) { task ->
+//                    val user = task.result?.user!!
+//                    membersRef.document(user.uid).get()
+//                        .addOnFailureListener{
+//                            Log.d(Constants.TAG, "failure listener")
+//                            userObject = MemberObject(user.uid, user.displayName ?: "empty", user.uid)
+//                            membersRef.add(userObject)
+//                    }
+//                }
+        } else if (requestCode == RC_SIGN_IN){
+//            val response = IdpResponse.fromResultIntent(data)
+            if (resultCode == Activity.RESULT_OK) {
+                // Successfully signed in
+//                val user = FirebaseAuth.getInstance().currentUser
+            }
+        }
     }
 
     override fun signOut() {
         appBar.isVisible = false
+        navAdapter.teams.clear()
+        navAdapter.notifyDataSetChanged()
+        onBackPressed() //Tom Foolery
+        supportFragmentManager.fragments.clear()
+        Log.d(Constants.TAG, "F on backstack: ${supportFragmentManager.fragments.size}")
         auth.signOut()
     }
 }

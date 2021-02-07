@@ -63,6 +63,9 @@
     <string name="choose_your_picture">Choose your picture</string>
     <string name="done">Done</string>
     <string name="welcome">Welcome</string>
+    <string name="email">Email</string>
+    <string name="google">Google</string>
+    <string name="rosefire">Rosefire</string>
 
     <string-array name="task_status_array">
         <item>Not Started</item>

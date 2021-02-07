@@ -22,19 +22,19 @@ class ProfileAdapter(
         return ProfileViewHolder(view, this, context)
     }
 
-    init{
-        add(ProfileTeamModel("GPE", "Admin"))
-        add(ProfileTeamModel("Catalyst", "Owner"))
-        add(ProfileTeamModel("Life", "Member"))
-        add(ProfileTeamModel("Rose", "Member"))
-    }
+//    init{
+//        add(ProfileTeamModel("GPE", "Admin"))
+//        add(ProfileTeamModel("Catalyst", "Owner"))
+//        add(ProfileTeamModel("Life", "Member"))
+//        add(ProfileTeamModel("Rose", "Member"))
+//    }
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onBindViewHolder(viewHolder: ProfileViewHolder, index: Int) {
         viewHolder.bind(userTeams[index])
     }
 
-    private fun add(profileTeamModel: ProfileTeamModel){
+    fun add(profileTeamModel: ProfileTeamModel){
         userTeams.add(profileTeamModel)
         notifyDataSetChanged()
     }

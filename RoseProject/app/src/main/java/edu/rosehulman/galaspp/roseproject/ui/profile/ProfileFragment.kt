@@ -1,7 +1,7 @@
 package edu.rosehulman.galaspp.roseproject.ui.profile
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AlertDialog
@@ -11,9 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.rosehulman.galaspp.roseproject.AuthenticationListener
 import edu.rosehulman.galaspp.roseproject.Constants
-import edu.rosehulman.galaspp.roseproject.FragmentListener
 import edu.rosehulman.galaspp.roseproject.R
-import kotlinx.android.synthetic.main.fragment_profile.*
+import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
 import kotlinx.android.synthetic.main.fragment_profile.view.*
 
 
@@ -22,18 +21,22 @@ private const val ARG_UID = "uid"
 
 class ProfileFragment : Fragment() {
 
-    private var profile: ProfileModel? = null
+//    private var profile: ProfileModel? = null
+    private var memberObject: MemberObject? = null
     private var uid: String? = null
     private lateinit var adapter: ProfileAdapter
     private val membersRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
+    private val teamsRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.TEAMS_COLLECTION)
 
 
     companion object {
         var listener: AuthenticationListener? = null
         @JvmStatic
-        fun newInstance(profile: ProfileModel, uid: String) =
+        fun newInstance(profile: MemberObject, uid: String) =
                 ProfileFragment().apply {
                     arguments = Bundle().apply {
                         putParcelable(ARG_PROFILE, profile)
@@ -45,7 +48,7 @@ class ProfileFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            profile = it.getParcelable(ARG_PROFILE)
+            memberObject = it.getParcelable(ARG_PROFILE)
             uid = it.getString(ARG_UID)
         }
 
@@ -78,9 +81,15 @@ class ProfileFragment : Fragment() {
         adapter = ProfileAdapter(context)
         recyclerView.adapter = adapter
 
+        for(team in memberObject!!.teams){
+            //TODO:Fix - should not automatically set status to owner
+            adapter.add(ProfileTeamModel(team.teamName, memberObject!!.statuses[team.id] ?: error("")))
+        }
+
         return view
     }
 
+    @SuppressLint("UseRequireInsteadOfGet")
     private fun showSignOutDialog(context : Context?) {
         val builder = AlertDialog.Builder(context!!)
         builder.setTitle(R.string.logout_confirmation)

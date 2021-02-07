@@ -15,8 +15,8 @@ import edu.rosehulman.galaspp.roseproject.ui.project.ProjectObject
 import edu.rosehulman.galaspp.roseproject.ui.project.TaskObject
 import kotlinx.android.synthetic.main.create_project_modal.view.*
 
-class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener) : RecyclerView.Adapter<NavDrawerHolder>() {
-    private var teams : ArrayList<TeamObject> = ArrayList()
+class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener, var userObject : MemberObject?) : RecyclerView.Adapter<NavDrawerHolder>() {
+    var teams : ArrayList<TeamObject> = ArrayList()
 //    var projects = HashMap<String, ArrayList<ProjectObject>>()
 
     private val teamsRef = FirebaseFirestore
@@ -32,7 +32,7 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
 
-    init {
+    fun setup() {
         teamsRef
             .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
                 if(exception != null) {
@@ -43,9 +43,11 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
                     val team = TeamObject.fromSnapshot(teamChange.document)
                     when(teamChange.type) {
                         DocumentChange.Type.ADDED -> {
-                            getProjectsFromIDs(team.projectReferences, team)
-                            teams.add(0, team)
-                            notifyItemInserted(0)
+                            if(userObject?.teams?.contains(team)!!){
+                                getProjectsFromIDs(team.projectReferences, team)
+                                teams.add(0, team)
+                                notifyItemInserted(0)
+                            }
                         }
                         DocumentChange.Type.REMOVED -> {
                             val pos = teams.indexOfFirst { team.id == it.id }
@@ -87,7 +89,7 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
                         if(projIds.contains(po.id)) {
                             when (projChange.type) {
                                 DocumentChange.Type.ADDED -> {
-                                    Log.d("TEST", po.projectTitle)
+//                                    Log.d("TEST", po.projectTitle)
                                     getTasksFromIDs(po.taskReferences, po)
                                     tm.projects.add(0, po)
                                     notifyDataSetChanged()
@@ -170,7 +172,12 @@ class NavDrawerAdapter (var context: Context, var listener: OnNavDrawerListener)
     }
 
     fun addTeam(team: TeamObject){
-        teamsRef.add(team)
+        //Add team to firebase and its reference to the member along with the member's status
+        teamsRef.add(team).addOnSuccessListener {
+            val nestedData = hashMapOf(it.id to Constants.OWNER)
+            val data = hashMapOf(Constants.STATUSES_FIELD to nestedData)
+            memberRef.document(userObject?.id!!).set(data, SetOptions.merge())
+        }
     }
 
     fun editTeamClicked(adapterPosition: Int)    {

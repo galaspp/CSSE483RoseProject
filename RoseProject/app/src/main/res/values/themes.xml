@@ -26,10 +26,12 @@
         <item name="android:layout_weight">1</item>
     </style>
 
-<!--    <style name="LoginTheme" parent="FirebaseUI">-->
-<!--        <item name="android:statusBarColor">@color/rosered</item>-->
-<!--        <item name="android:windowBackground">@drawable/sign_in_img</item>-->
-<!--        <item name="windowActionBar">false</item>-->
-<!--        <item name="windowNoTitle">true</item>-->
-<!--    </style>-->
+        <style name="LoginTheme" parent="FirebaseUI">
+            <item name="android:statusBarColor">@color/rosered</item>
+            <item name="windowActionBar">false</item>
+            <item name="windowNoTitle">true</item>
+            <item name="colorPrimary">@color/rosered</item>
+
+        </style>
+
 </resources>

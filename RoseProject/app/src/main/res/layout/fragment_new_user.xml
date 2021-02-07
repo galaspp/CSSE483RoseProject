@@ -73,7 +73,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/enter_your_username"
-        android:inputType="textCapWords"
+        android:inputType="text"
         android:textSize="24sp"
         android:layout_below="@id/new_username_text_view"/>
     <TextView

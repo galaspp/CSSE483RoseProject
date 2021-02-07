@@ -1,16 +1,18 @@
 package edu.rosehulman.galaspp.roseproject.ui.createeditteam
 
+import android.os.Parcelable
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Exclude
+import kotlinx.android.parcel.Parcelize
 
-
+@Parcelize
 data class MemberObject(
         var userName : String = "",
         var name : String = "",
-        var id : String = ""
+        var id : String = "",
 //        var teamsReferences : ArrayList<String> = ArrayList(),
-//        var statuses : Map<String, String> = mapOf(),
-) {
+        var statuses : Map<String, String> = mapOf()
+) :Parcelable {
 //    @get: Exclude var id = ""
     @get: Exclude var teams = ArrayList<TeamObject>()
     companion object{

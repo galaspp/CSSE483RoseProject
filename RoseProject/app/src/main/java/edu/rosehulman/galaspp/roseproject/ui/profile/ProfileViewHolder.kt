@@ -36,7 +36,7 @@ class ProfileViewHolder : RecyclerView.ViewHolder {
     fun bind(teamModel: ProfileTeamModel) {
         teamTitleTextView.text = teamModel.team_name
         statusTextView.text = teamModel.status
-        if(teamModel.status == "Admin" || teamModel.status == "Owner"){
+        if(teamModel.status == "Admin" || teamModel.status == "Owner" || teamModel.status == "admin" || teamModel.status == "owner"){
             exportButton.isEnabled = true
             val color = ContextCompat.getColor(context!!, R.color.rosered)
             exportButton.setBackgroundColor(color)
