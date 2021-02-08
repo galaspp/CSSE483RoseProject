@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.SetOptions
 import edu.rosehulman.galaspp.roseproject.ui.NewUserFragment
 import edu.rosehulman.galaspp.roseproject.ui.SplashFragment
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
@@ -176,7 +177,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         recyclerView.setHasFixedSize(true)
 
         view.create_team_add_members_modal.setOnClickListener{
-            showAddRemoveMemberModal(adapter, view)
+            showAddRemoveMemberModal(adapter, view, position, adapterNav)
         }
 
         if(position != -1)
@@ -188,7 +189,11 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 {
                     if(adapterNav.getTeamDetails(position).teamMemberReferences.contains(snapshot.id))
                     {
-                        adapter.addMember(MemberObject.fromSnapshot(snapshot), snapshot.id)
+                        val memberObject = MemberObject.fromSnapshot(snapshot)
+                        if(memberObject.statuses[adapterNav.getTeamDetails(position).id] == Constants.OWNER)
+                            adapter.addMember(memberObject, snapshot.id,  1)
+                        else
+                            adapter.addMember(memberObject, snapshot.id,  0)
                     }
                 }
             }
@@ -202,20 +207,38 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 membersRef.whereEqualTo("id", userID).get().addOnSuccessListener {
                     userObject = MemberObject.fromSnapshot(it.documents[0])
                     val list = adapter.getMemberObjectIds()
+                    val statusList = adapter.getMemberStatusList()
                     list.add(userObject.id)
                     adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString(),
                             view.edit_text_team_description.text.toString(),
                             list
-                    ))
+                    ), list, statusList)
                 }
 
             }
             else{
+                val list = adapter.getMemberObjectIds()
+                val statusList = adapter.getMemberStatusList()
                 adapterNav.editTeamAtPosition(position,
                         view.edit_text_team_name.text.toString(),
                         view.edit_text_team_description.text.toString(),
                         adapter.getMemberObjectIds()
                 )
+
+                for(i in 0 until list.size)
+                {
+                    var nestedData: HashMap<String, String>
+                    if(statusList[i] == 0)
+                    {
+                        nestedData = hashMapOf(adapterNav.getTeamDetails(position).id to Constants.MEMBER)
+                    }
+                    else
+                    {
+                        nestedData = hashMapOf(adapterNav.getTeamDetails(position).id to Constants.OWNER)
+                    }
+                    val data = hashMapOf(Constants.STATUSES_FIELD to nestedData)
+                    membersRef.document(list[i]).set(data, SetOptions.merge())
+                }
             }
         }
         builder.setNegativeButton(android.R.string.cancel, null)
@@ -223,7 +246,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     }
 
 
-    private fun showAddRemoveMemberModal(adapter: CreateEditTeamAdapter, addTeamView: View){
+    private fun showAddRemoveMemberModal(adapter: CreateEditTeamAdapter, addTeamView: View, position: Int, adapterNav: NavDrawerAdapter){
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Add/Remove Member")
         val view = LayoutInflater.from(this).inflate(R.layout.add_remove_members_modal, null, false)
@@ -243,7 +266,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
             membersRef.whereEqualTo("name", view.edit_text_member_username.text.toString()).get()
                     .addOnSuccessListener {
                         if(!it.isEmpty){
-                            adapter.addMember(MemberObject.fromSnapshot(it.documents[0]), it.documents[0].id)
+                            adapter.addMember(MemberObject.fromSnapshot(it.documents[0]), it.documents[0].id, view.userPermissionSpinner.selectedItemPosition)
                         }
                         else{
                             Snackbar.make(addTeamView, "User ${view.edit_text_member_username.text} does not exist", Snackbar.LENGTH_LONG).show()

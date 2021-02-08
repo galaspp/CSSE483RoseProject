@@ -170,12 +170,26 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
         return teams.size
     }
 
-    fun addTeam(team: TeamObject){
+    fun addTeam(team: TeamObject, list: ArrayList<String>, statusList: ArrayList<Int>){
         //Add team to firebase and its reference to the member along with the member's status
         teamsRef.add(team).addOnSuccessListener {
             val nestedData = hashMapOf(it.id to Constants.OWNER)
             val data = hashMapOf(Constants.STATUSES_FIELD to nestedData)
             memberRef.document(userObject?.id!!).set(data, SetOptions.merge())
+
+            //TODO: FIX this error when you create a new team
+            if(list.size != 0 && statusList.size != 0) {
+                for (i in 0 until statusList.size) {
+//                    var nestedData: HashMap<String, String>
+                    var nestedData = if (statusList[i] == 0) {
+                        hashMapOf(it.id to Constants.MEMBER)
+                    } else {
+                        hashMapOf(it.id to Constants.OWNER)
+                    }
+                    val data = hashMapOf(Constants.STATUSES_FIELD to nestedData)
+                    memberRef.document(list[i]).set(data, SetOptions.merge())
+                }
+            }
         }
     }
 
@@ -212,11 +226,27 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun editTeamAtPosition(position: Int, teamName: String, teamDescription: String,
                            members: ArrayList<String>){
         //Todo: Complete edit team
         teams[position].teamName = teamName
         teams[position].teamDescription = teamDescription
+
+        for(i in 0 until teams[position].teamMemberReferences.size)
+        {
+            if(!members.contains(teams[position].teamMemberReferences[i]))
+            {
+                memberRef.document(teams[position].teamMemberReferences[i]).get().addOnSuccessListener {
+                    val memberObject = MemberObject.fromSnapshot(it)
+                    val membersToRemove = (it[Constants.STATUSES_FIELD] as MutableMap<String, String>)
+                    membersToRemove.remove(teams[position].id)
+                    memberObject.statuses = membersToRemove
+//                    val data = hashMapOf(Constants.STATUSES_FIELD to membersToRemove)
+                    memberRef.document(memberObject.id).set(memberObject)
+                }
+            }
+        }
         teams[position].teamMemberReferences = members
 //        teams[position].projects = projects
 //        this.projects[teams[position].teamName] = projects

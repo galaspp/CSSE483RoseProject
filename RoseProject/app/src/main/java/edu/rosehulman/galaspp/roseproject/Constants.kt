@@ -20,6 +20,6 @@ object Constants {
 
     var OWNER = "Owner"
     var ADMIN = "Owner"
-    var MEMBER = "Owner"
+    var MEMBER = "Member"
 
 }

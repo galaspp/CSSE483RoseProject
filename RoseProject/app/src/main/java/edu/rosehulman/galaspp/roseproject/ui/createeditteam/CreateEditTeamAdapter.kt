@@ -1,15 +1,24 @@
 package edu.rosehulman.galaspp.roseproject.ui.createeditteam
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.R
 import edu.rosehulman.galaspp.roseproject.ui.project.ProjectObject
 
 class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateEditTeamHolder>() {
     private var listofusernames : ArrayList<MemberObject> = ArrayList()
     private var listOfIds : ArrayList<String> = ArrayList()
+    private var listOfMemberStatus : ArrayList<Int> = ArrayList()
+
+    private val membersRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.MEMBER_COLLECTION)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CreateEditTeamHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.create_edit_team_card_view, parent, false)
@@ -39,11 +48,22 @@ class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateE
         notifyDataSetChanged()
     }
 
-    fun addMember(memberObject: MemberObject, memberObjectID: String )
+    fun addMember(memberObject: MemberObject, memberObjectID: String, memberStatus: Int)
     {
-        listofusernames.add(0, memberObject)
-        listOfIds.add(memberObjectID)
-        notifyItemInserted(0)
+        if(listOfIds.contains(memberObjectID))
+        {
+            val position = listOfIds.indexOfFirst { it == memberObjectID }
+            listOfMemberStatus[position] = memberStatus
+            listofusernames[position] = memberObject
+            listOfIds[position] = memberObjectID
+            notifyDataSetChanged()
+        }
+        else {
+            listofusernames.add(0, memberObject)
+            listOfIds.add(0, memberObjectID)
+            listOfMemberStatus.add(0, memberStatus)
+            notifyItemInserted(0)
+        }
     }
 
     fun getMemberObjectIds() :ArrayList<String>
@@ -51,14 +71,21 @@ class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateE
         return listOfIds
     }
 
+    fun getMemberStatusList(): ArrayList<Int>
+    {
+        return listOfMemberStatus
+    }
+
     fun removeName(name: String)
     {
-        for(i in 0..listofusernames.size) {
+        for(i in 0 until listofusernames.size) {
             if(listofusernames.get(i).userName == name) {
                 listofusernames.removeAt(i)
-                notifyItemChanged(i)
+                listOfIds.removeAt(i)
+                listOfMemberStatus.removeAt(i)
                 break
             }
         }
+        notifyDataSetChanged()
     }
 }
