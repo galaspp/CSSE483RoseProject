@@ -15,12 +15,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.*
 import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.R
+import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
 import kotlinx.android.synthetic.main.create_edit_task_modal.view.*
 import kotlin.collections.ArrayList
 
 class ProjectAdapter(
         private var context: Context,
         private var project: ProjectObject,
+        var userObject: String,
+        private var teamId: String
 ) : RecyclerView.Adapter<ProjectViewHolder>(){
 
     private var itemFilter: Int = 0
@@ -30,6 +33,9 @@ class ProjectAdapter(
     private val tasksRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.TASKS_COLLECTION)
+    private val memberRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.MEMBER_COLLECTION)
 
     override fun getItemCount() = project.projectTasks.filter { s -> s.currentStatus == itemFilter }.size//tasks.size
 
@@ -181,12 +187,25 @@ class ProjectAdapter(
 
         if(position != -1)
         {
-            builder.setNeutralButton("Delete") { _,_ ->
-                confirmDeleteModal(position)
+            memberRef.document(userObject).get().addOnSuccessListener {
+                val memObj = MemberObject.fromSnapshot(it)
+                if(memObj.statuses[teamId] == Constants.OWNER)
+                {
+                    builder.setNeutralButton("Delete") { _, _ ->
+                        confirmDeleteModal(position)
+                    }
+                    builder.create().show()
+                }
+                else
+                {
+                    builder.create().show()
+                }
             }
         }
-
-        builder.create().show()
+        else
+        {
+            builder.create().show()
+        }
     }
 
     private fun confirmDeleteModal(position : Int)

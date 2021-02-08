@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     private fun openProfile(profile: MemberObject){
         //Prevent multiple profiles being added to backstack
         val backStackSize = supportFragmentManager.backStackEntryCount
-        if(backStackSize == 0 || supportFragmentManager.getBackStackEntryAt(backStackSize-1).name != "profile"){
+        if(backStackSize == 0 || supportFragmentManager.getBackStackEntryAt(backStackSize - 1).name != "profile"){
             //Add profile fragment
             val profileFragment = ProfileFragment.newInstance(profile, auth.currentUser!!.uid)
             val ft = supportFragmentManager.beginTransaction()
@@ -191,9 +191,9 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                     {
                         val memberObject = MemberObject.fromSnapshot(snapshot)
                         if(memberObject.statuses[adapterNav.getTeamDetails(position).id] == Constants.OWNER)
-                            adapter.addMember(memberObject, snapshot.id,  1)
+                            adapter.addMember(memberObject, snapshot.id, 1)
                         else
-                            adapter.addMember(memberObject, snapshot.id,  0)
+                            adapter.addMember(memberObject, snapshot.id, 0)
                     }
                 }
             }
@@ -241,8 +241,20 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 }
             }
         }
-        builder.setNegativeButton(android.R.string.cancel, null)
-        builder.create().show()
+        membersRef.document(userID).get().addOnSuccessListener {
+            val memberObject = MemberObject.fromSnapshot(it)
+            if((position != -1 && memberObject.statuses[navAdapter.getTeamDetails(position).id] == Constants.OWNER) || position == -1) {
+                builder.setNegativeButton(android.R.string.cancel, null)
+                builder.create().show()
+            }
+            else
+            {
+                val parentLayout = findViewById<View>(android.R.id.content)
+                Snackbar.make(parentLayout, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
+            }
+        }
+//        builder.setNegativeButton(android.R.string.cancel, null)
+//        builder.create().show()
     }
 
 
@@ -283,7 +295,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     private fun getMembers() : ArrayList<String> {
         //Access members reference and extract name of each user, return in array
         val ret = ArrayList<String>()
-        membersRef.get().addOnSuccessListener { snapshot : QuerySnapshot ->
+        membersRef.get().addOnSuccessListener { snapshot: QuerySnapshot ->
             for (doc in snapshot) ret.add(MemberObject.fromSnapshot(doc).name)
         }
         return ret
@@ -341,7 +353,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun addTeams(userObject: MemberObject, uid : String) {
+    private fun addTeams(userObject: MemberObject, uid: String) {
         membersRef.document(uid).get().addOnSuccessListener {
             val ids = (it[Constants.STATUSES_FIELD] as Map<String, String>).keys
 //            Log.d(Constants.TAG, ids.toString())
@@ -358,23 +370,23 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     }
 
     @Suppress("CanBeVal")
-    override fun onLoginButtonPressed(providerType : Int) {
+    override fun onLoginButtonPressed(providerType: Int) {
         var loginIntent : Intent?
         when (providerType){
             Constants.PROVIDER_EMAIL -> {
                 loginIntent = AuthUI.getInstance()
-                    .createSignInIntentBuilder()
-                    .setAvailableProviders(arrayListOf(AuthUI.IdpConfig.EmailBuilder().build()))
-                    .setTheme(R.style.LoginTheme)
-                    .build()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(arrayListOf(AuthUI.IdpConfig.EmailBuilder().build()))
+                        .setTheme(R.style.LoginTheme)
+                        .build()
                 startActivityForResult(loginIntent, RC_SIGN_IN)
             }
             Constants.PROVIDER_GOOGLE -> {
                 loginIntent = AuthUI.getInstance()
-                    .createSignInIntentBuilder()
-                    .setAvailableProviders(arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build()))
-                    .setTheme(R.style.LoginTheme)
-                    .build()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build()))
+                        .setTheme(R.style.LoginTheme)
+                        .build()
                 startActivityForResult(loginIntent, RC_SIGN_IN)
             }
             Constants.PROVIDER_ROSE -> {

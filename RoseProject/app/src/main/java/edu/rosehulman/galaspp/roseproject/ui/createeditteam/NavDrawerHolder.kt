@@ -90,8 +90,10 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
             val project = team.projects[childPosition]
 //            val projectName = adapter.projects[team.teamName]!![childPosition].projectTitle
             val projectName = team.projects[childPosition].projectTitle
-            (context as FragmentListener)
-                .openFragment(ProjectFragment.newInstance(project), true, projectName)
+            adapter.userObject?.let { ProjectFragment.newInstance(project, it.id, team.id) }?.let {
+                (context as FragmentListener)
+                    .openFragment(it, true, projectName)
+            }
             false
         }
 

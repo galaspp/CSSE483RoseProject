@@ -4,10 +4,12 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.*
 import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.R
@@ -31,6 +33,8 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
     private val memberRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
+
+    lateinit var viewNavDrawer: View
 
     fun setup() {
         teamsRef
@@ -157,8 +161,10 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NavDrawerHolder {
-        val view = LayoutInflater.from(context).inflate(R.layout.drawer_card_view, parent, false)
-        return NavDrawerHolder(context, view, this)
+//        val view = LayoutInflater.from(context).inflate(R.layout.drawer_card_view, parent, false)
+//        return NavDrawerHolder(context, view, this)
+        viewNavDrawer = LayoutInflater.from(context).inflate(R.layout.drawer_card_view, parent, false)
+        return NavDrawerHolder(context, viewNavDrawer, this)
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -298,7 +304,21 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
                 confirmDeleteModal(projects[childPosition].id)
             }
         }
-        builder.create().show()
+
+        userObject?.let {
+            if(userObject?.statuses?.get(teams[position].id) == Constants.OWNER)
+            {
+                builder.create().show()
+            }
+            else
+            {
+                Snackbar.make(viewNavDrawer, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
+            }
+
+        }
+//        val parentLayout = android.R.id.content as View
+//        Snackbar.make(parentLayout, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
+//        builder.create().show()
     }
 
     private fun confirmDeleteModal(itemId : String)
