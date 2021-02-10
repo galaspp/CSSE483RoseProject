@@ -342,8 +342,8 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                         app_bar_view.isVisible = true
                         openFragment(WelcomeFragment(userObject.userName), false, "welcome")
                         navAdapter.userObject = userObject
+                        addTeams(userObject, userID)
                     }
-                    addTeams(userObject, userID)
                 }
             } else {
                 openFragment(SplashFragment(), false, "splash")
@@ -431,6 +431,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         appBar.isVisible = false
         navAdapter.teams.clear()
         navAdapter.notifyDataSetChanged()
+        navAdapter.logout()
         onBackPressed() //Tom Foolery
         supportFragmentManager.fragments.clear()
         Log.d(Constants.TAG, "F on backstack: ${supportFragmentManager.fragments.size}")

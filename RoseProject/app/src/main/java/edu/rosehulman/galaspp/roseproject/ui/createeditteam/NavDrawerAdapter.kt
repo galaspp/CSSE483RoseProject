@@ -34,10 +34,16 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
 
+    private lateinit var teamReturnReference: ListenerRegistration
+    private lateinit var projectReturnReference: ListenerRegistration
+    private lateinit var taskReturnReference: ListenerRegistration
+    private lateinit var memberReturnReference: ListenerRegistration
+
     lateinit var viewNavDrawer: View
 
     fun setup() {
-        teamsRef
+        teams.clear()
+        teamReturnReference = teamsRef
             .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
                 if(exception != null) {
                     Log.e("Nav Drawer Error", "Listen Error: $exception")
@@ -68,6 +74,19 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
                     }
                 }
             }
+        memberReturnReference = memberRef.addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
+            if(exception != null) {
+                Log.e("Nav Drawer Error", "Listen Error: $exception")
+                return@addSnapshotListener
+            }
+            if (snapshot != null) {
+                for(eachMember in snapshot.documents) {
+                    val tempMember = MemberObject.fromSnapshot(eachMember)
+                    if(userObject!!.id == tempMember.id)
+                        userObject = tempMember
+                }
+            }
+        }
     }
 
     private fun deleteProjectReferences(projectReferences: ArrayList<String>) {
@@ -80,7 +99,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
 //    private fun getProjectsFromIDs(position: Int) {
         //Get top level projects reference from firebase
         //loop over ids and match with documents from projects reference, then convert and add to lists
-        projectsRef
+        projectReturnReference = projectsRef
                 .addSnapshotListener {snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
                     if(exception != null) {
                         Log.e("Nav Drawer Error", "Listen Error: $exception")
@@ -120,7 +139,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
     private fun getTasksFromIDs(ids : ArrayList<String>, po : ProjectObject) {
         //Get top level task reference from firebase
         //loop over ids and match with documents from tasks reference, then convert and add to lists
-        tasksRef
+        taskReturnReference = tasksRef
 //                .whereEqualTo("id", ids)
                 .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
                     if (exception != null) {
@@ -205,6 +224,14 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
 
     fun getTeamDetails(position: Int): TeamObject    {
         return teams[position]
+    }
+
+    fun logout() {
+        teamReturnReference.remove()
+        projectReturnReference.remove()
+        taskReturnReference.remove()
+        memberReturnReference.remove()
+
     }
 
     private fun removeProject(itemId : String) {
@@ -315,6 +342,8 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
                 Snackbar.make(viewNavDrawer, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
             }
 
+        } ?: run{
+            Snackbar.make(viewNavDrawer, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
         }
 //        val parentLayout = android.R.id.content as View
 //        Snackbar.make(parentLayout, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
