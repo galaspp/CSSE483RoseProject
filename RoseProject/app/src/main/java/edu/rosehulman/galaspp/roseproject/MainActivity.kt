@@ -22,10 +22,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.*
 import edu.rosehulman.galaspp.roseproject.ui.NewUserFragment
 import edu.rosehulman.galaspp.roseproject.ui.SplashFragment
 import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
@@ -45,7 +42,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         FragmentListener , SplashFragment.OnLoginButtonPressedListener,
         AuthenticationListener
 {
-    // Done: Create instance of FirebaseAuth and an AuthStateListener
+    // Create instance of FirebaseAuth and an AuthStateListener
     private val auth = FirebaseAuth.getInstance()
     lateinit var authStateListener: FirebaseAuth.AuthStateListener
     // Request code for launching the sign in Intent.
@@ -99,8 +96,19 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         app_bar_view.isVisible = false
         ProfileFragment.listener = this
         fab.hide()
-
         initializeListeners()
+
+        //Snapshot Listener for member object
+        membersRef.addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
+            for (userChange in snapshot!!.documentChanges) {
+                if (userChange.type == DocumentChange.Type.MODIFIED) {
+                    Log.d(Constants.TAG, "User Changed")
+                    userObject = MemberObject.fromSnapshot(userChange.document)
+                    addTeamsToUserObject()
+                }
+            }
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -125,12 +133,12 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     }
 
     //adds one profile to backstack
-    private fun openProfile(profile: MemberObject){
+    private fun openProfile(user: MemberObject){
         //Prevent multiple profiles being added to backstack
         val backStackSize = supportFragmentManager.backStackEntryCount
         if(backStackSize == 0 || supportFragmentManager.getBackStackEntryAt(backStackSize - 1).name != "profile"){
             //Add profile fragment
-            val profileFragment = ProfileFragment.newInstance(profile, auth.currentUser!!.uid)
+            val profileFragment = ProfileFragment.newInstance(user)
             val ft = supportFragmentManager.beginTransaction()
             ft.replace(R.id.fragment_container, profileFragment)
             ft.addToBackStack("profile")
@@ -312,9 +320,8 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     }
 
     private fun initializeListeners() {
-        // DONE: Create an AuthStateListener that passes the UID
-        // to the MovieQuoteFragment if the user is logged in
-        // and goes back to the Splash fragment otherwise.
+        //Create an AuthStateListener that passes the UID to the MovieQuoteFragment if the user is
+        // logged in and goes back to the Splash fragment otherwise.
         // See https://firebase.google.com/docs/auth/users#the_user_lifecycle
         authStateListener = FirebaseAuth.AuthStateListener { auth: FirebaseAuth ->
             val user = auth.currentUser
@@ -332,7 +339,8 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                         val newMember = MemberObject("", user.displayName ?: "", userID)
                         membersRef.document(userID).set(newMember).addOnSuccessListener {
                             userObject = newMember
-                            addTeams(userObject, userID)
+                            addTeamsToUserObject()
+                            navAdapter.setup(userObject)
                             app_bar_view.isVisible = false
                             openFragment(NewUserFragment(this, userObject, app_bar_view), false, "new user")
                         }
@@ -342,7 +350,8 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                         app_bar_view.isVisible = true
                         openFragment(WelcomeFragment(userObject.userName), false, "welcome")
                         navAdapter.userObject = userObject
-                        addTeams(userObject, userID)
+                        addTeamsToUserObject()
+                        navAdapter.setup(userObject)
                     }
                 }
             } else {
@@ -353,10 +362,9 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun addTeams(userObject: MemberObject, uid: String) {
-        membersRef.document(uid).get().addOnSuccessListener {
+    private fun addTeamsToUserObject() {
+        membersRef.document(userObject.id).get().addOnSuccessListener {
             val ids = (it[Constants.STATUSES_FIELD] as Map<String, String>).keys
-//            Log.d(Constants.TAG, ids.toString())
             for (id in ids) {
                 teamsRef.document(id).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
                     val team = TeamObject.fromSnapshot(snapshot)
@@ -365,7 +373,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                     }
                 }
             }
-            navAdapter.setup(userObject)
         }
     }
 
@@ -393,10 +400,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 loginIntent = Rosefire.getSignInIntent(this, Constants.ROSE_STRING)
                 startActivityForResult(loginIntent, RC_ROSEFIRE_LOGIN)
             }
-            else -> loginIntent = null
-        }
-        if(loginIntent == null){
-            Log.e("Provider Error", "Authentication provider does not exist")
+            else -> Log.e("Provider Error", "Authentication provider does not exist")
         }
     }
 
@@ -404,33 +408,12 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RC_ROSEFIRE_LOGIN) {
             val result = Rosefire.getSignInResultFromIntent(data)
-//            if (!result.isSuccessful) {
-//                // The user cancelled the login
-//                var dummyvar = -1
-//            }
             FirebaseAuth.getInstance().signInWithCustomToken(result.token)
-//                .addOnCompleteListener(this) { task ->
-//                    val user = task.result?.user!!
-//                    membersRef.document(user.uid).get()
-//                        .addOnFailureListener{
-//                            Log.d(Constants.TAG, "failure listener")
-//                            userObject = MemberObject(user.uid, user.displayName ?: "empty", user.uid)
-//                            membersRef.add(userObject)
-//                    }
-//                }
-        } else if (requestCode == RC_SIGN_IN){
-//            val response = IdpResponse.fromResultIntent(data)
-            if (resultCode == Activity.RESULT_OK) {
-                // Successfully signed in
-//                val user = FirebaseAuth.getInstance().currentUser
-            }
         }
     }
 
     override fun signOut() {
         appBar.isVisible = false
-        navAdapter.teams.clear()
-        navAdapter.notifyDataSetChanged()
         navAdapter.logout()
         onBackPressed() //Tom Foolery
         supportFragmentManager.fragments.clear()

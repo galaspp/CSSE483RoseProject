@@ -10,10 +10,8 @@ data class MemberObject(
         var userName : String = "",
         var name : String = "",
         var id : String = "",
-//        var teamsReferences : ArrayList<String> = ArrayList(),
         var statuses : Map<String, String> = mapOf()
 ) :Parcelable {
-//    @get: Exclude var id = ""
     @get: Exclude var teams = ArrayList<TeamObject>()
     companion object{
         fun fromSnapshot(snapshot: DocumentSnapshot): MemberObject {

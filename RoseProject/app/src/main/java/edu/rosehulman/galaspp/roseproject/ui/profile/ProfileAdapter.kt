@@ -10,7 +10,7 @@ import edu.rosehulman.galaspp.roseproject.R
 import kotlin.collections.ArrayList
 
 class ProfileAdapter(
-        private var context: Context?,
+        private var context: Context?
 ) : RecyclerView.Adapter<ProfileViewHolder>(){
 
     private val userTeams = ArrayList<ProfileTeamModel>()
@@ -22,21 +22,14 @@ class ProfileAdapter(
         return ProfileViewHolder(view, this, context)
     }
 
-//    init{
-//        add(ProfileTeamModel("GPE", "Admin"))
-//        add(ProfileTeamModel("Catalyst", "Owner"))
-//        add(ProfileTeamModel("Life", "Member"))
-//        add(ProfileTeamModel("Rose", "Member"))
-//    }
-
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onBindViewHolder(viewHolder: ProfileViewHolder, index: Int) {
         viewHolder.bind(userTeams[index])
     }
 
     fun add(profileTeamModel: ProfileTeamModel){
-        userTeams.add(profileTeamModel)
-        notifyDataSetChanged()
+        userTeams.add(0, profileTeamModel)
+        notifyItemChanged(0)
     }
 
     private fun remove(position: Int){

@@ -19,8 +19,6 @@ import kotlinx.android.synthetic.main.create_project_modal.view.*
 
 class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener, var userObject : MemberObject? = null) : RecyclerView.Adapter<NavDrawerHolder>() {
     var teams : ArrayList<TeamObject> = ArrayList()
-//    var projects = HashMap<String, ArrayList<ProjectObject>>()
-
     private val teamsRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.TEAMS_COLLECTION)
@@ -58,6 +56,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
                                 getProjectsFromIDs(team.projectReferences, team)
                                 teams.add(0, team)
                                 notifyItemInserted(0)
+                                Log.d(Constants.TAG, "Item Inserted in Nav Drawer, teamSize: ${teams.size}")
                             }
                             DocumentChange.Type.REMOVED -> {
                                 val pos = teams.indexOfFirst { team.id == it.id }
@@ -198,6 +197,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
 
     fun addTeam(team: TeamObject, list: ArrayList<String>, statusList: ArrayList<Int>){
         //Add team to firebase and its reference to the member along with the member's status
+        Log.d(Constants.TAG, "Adding a team: ${team.teamName}")
         teamsRef.add(team).addOnSuccessListener {
             val nestedData = hashMapOf(it.id to Constants.OWNER)
             val data = hashMapOf(Constants.STATUSES_FIELD to nestedData)
@@ -207,13 +207,13 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
             if(list.size != 0 && statusList.size != 0) {
                 for (i in 0 until statusList.size) {
 //                    var nestedData: HashMap<String, String>
-                    var nestedData = if (statusList[i] == 0) {
+                    val nestedData2 = if (statusList[i] == 0) {
                         hashMapOf(it.id to Constants.MEMBER)
                     } else {
                         hashMapOf(it.id to Constants.OWNER)
                     }
-                    val data = hashMapOf(Constants.STATUSES_FIELD to nestedData)
-                    memberRef.document(list[i]).set(data, SetOptions.merge())
+                    val data2 = hashMapOf(Constants.STATUSES_FIELD to nestedData2)
+                    memberRef.document(list[i]).set(data2, SetOptions.merge())
                 }
             }
         }
@@ -228,6 +228,8 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
     }
 
     fun logout() {
+        teams.clear()
+        notifyDataSetChanged()
         teamReturnReference?.remove()
         projectReturnReference?.remove()
         taskReturnReference?.remove()
