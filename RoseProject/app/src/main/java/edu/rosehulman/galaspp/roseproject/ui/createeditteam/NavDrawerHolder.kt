@@ -16,8 +16,6 @@ import edu.rosehulman.galaspp.roseproject.ui.CustomExpandableListAdapter
 import edu.rosehulman.galaspp.roseproject.ui.project.ProjectFragment
 import kotlinx.android.synthetic.main.drawer_card_view.view.*
 
-
-
 class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDrawerAdapter) : RecyclerView.ViewHolder(itemView) {
     var view: View = itemView
     lateinit var listAdapter: CustomExpandableListAdapter
@@ -25,6 +23,7 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
     var listDataHeader: List<String>? = null
     var listDataChild: HashMap<String, List<String>>? = null
     private val DEFAULT_HEIGHT = 92
+    lateinit var team: TeamObject
 
     init {
         val dropDownMenu = PopupMenu(itemView.context, itemView.card_options_button)
@@ -35,7 +34,7 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         dropDownMenu.setOnMenuItemClickListener {
             when (it.itemId) {
                 0 -> {
-                    adapter.showCreateProjectModal(adapterPosition)
+                    adapter.showCreateProjectModal(-1, null, team)
                     true
                 }
                 1 -> {
@@ -50,8 +49,8 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         }
     }
 
-//    @RequiresApi(Build.VERSION_CODES.Q)
     fun bind(team: TeamObject){
+        this.team = team
         expListView = view.findViewById(R.id.expandable_list_view) as ExpandableListView
         // preparing list data
         listDataHeader = ArrayList()
@@ -75,7 +74,6 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         val numProjects = team.projects.size
         //Add on click listeners to adjust size
         expListView.setOnGroupExpandListener {
-
             card.layoutParams.height = DEFAULT_HEIGHT +
                     expListView[0].height * numProjects
         }
@@ -86,9 +84,7 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         expListView.setOnChildClickListener { parent, v, groupPosition, childPosition, id ->
             val childName = listAdapter.getChild(groupPosition, childPosition).toString()
             Log.d("test", "You clicked on project $childName!")
-//            val project = adapter.projects[team.teamName]!![childPosition]
             val project = team.projects[childPosition]
-//            val projectName = adapter.projects[team.teamName]!![childPosition].projectTitle
             val projectName = team.projects[childPosition].projectTitle
             adapter.userObject?.let { ProjectFragment.newInstance(project, it.id, team.id) }?.let {
                 (context as FragmentListener)
@@ -98,7 +94,7 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         }
 
         expListView.setOnItemLongClickListener { parent, view, position, id ->
-            adapter.showCreateProjectModal(adapterPosition, position - 1, team.projects)
+            adapter.showCreateProjectModal(position - 1, team.projects[position - 1], team)
             true
         }
     }

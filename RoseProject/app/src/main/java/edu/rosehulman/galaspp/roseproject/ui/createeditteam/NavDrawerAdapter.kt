@@ -93,6 +93,11 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
             projectsRef.document(refID).delete()
         }
     }
+    private fun deleteTaskReferences(taskReferences: ArrayList<String>) {
+        for( refID in taskReferences ){
+            projectsRef.document(refID).delete()
+        }
+    }
 
     private fun getProjectsFromIDs(projIds : ArrayList<String>, tm : TeamObject) {
 //    private fun getProjectsFromIDs(position: Int) {
@@ -235,31 +240,6 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
         memberReturnReference?.remove()
     }
 
-    private fun removeProject(itemId : String) {
-        var itemFound = false
-        for (tm in teams)
-        {
-            for(po in tm.projects)
-            {
-                if(po.id == itemId)
-                {
-                    var taskItems = po.taskReferences
-                    projectsRef.document(itemId).delete().addOnSuccessListener {
-                        for(task in taskItems)
-                        {
-                            tasksRef.document(task).delete()
-                        }
-                        teamsRef.document(tm.id).update("projectReferences", FieldValue.arrayRemove(itemId))
-                    }
-                    itemFound = true
-                    break
-                }
-            }
-            if(itemFound)
-                break
-        }
-    }
-
     @Suppress("UNCHECKED_CAST")
     fun editTeamAtPosition(position: Int, teamName: String, teamDescription: String,
                            members: ArrayList<String>){
@@ -290,80 +270,65 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
     }
 
 
-    fun showCreateProjectModal(position: Int, childPosition: Int = -1,  projects: ArrayList<ProjectObject> = ArrayList()) {
-        val builder = AlertDialog.Builder(context)
-        if(childPosition == -1)
-            builder.setTitle("Create Project? (Admin Only)")
-        else
-            builder.setTitle("Edit Project? (Admin Only)")
-
-        val view = LayoutInflater.from(context).inflate(R.layout.create_project_modal, null, false)
-        if(childPosition != -1)
-        {
-            view.edit_text_project_name.setText(projects[childPosition].projectTitle)
-            view.edit_text_project_description.setText(projects[childPosition].projectDescription)
-        }
-        builder.setView(view)
-        builder.setPositiveButton("Save") { _, _ ->
-            if(childPosition == -1) {
-                // Create Project from dialog boxes
-                val addedProject = ProjectObject(view.edit_text_project_name.text.toString(),
+    fun showCreateProjectModal(childPosition: Int = -1,  project: ProjectObject? = null, team: TeamObject? = null) {
+        //Check if user has permision to create/edit project within the team
+        if(userObject?.statuses?.get(team?.id) == Constants.OWNER) {
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle(if(childPosition==-1)"Create Project?" else "Edit Project?")
+            val view = LayoutInflater.from(context).inflate(R.layout.create_project_modal, null, false)
+            builder.setView(view)
+            if(childPosition != -1){
+                view.edit_text_project_name.setText(project!!.projectTitle)
+                view.edit_text_project_description.setText(project.projectDescription)
+                builder.setNeutralButton("Delete") { _,_ ->
+                    confirmDeleteModal(project, team!!)
+                }
+            }
+            builder.setPositiveButton("Save") { _, _ ->
+                if(childPosition == -1) {
+                    // Create Project from dialog boxes
+                    val addedProject = ProjectObject(view.edit_text_project_name.text.toString(),
                         view.edit_text_project_description.text.toString())
-                //Add project to project collection in firebase
-                projectsRef.add(addedProject)
-                        .addOnSuccessListener { snapshot: DocumentReference ->
-                            //Add project ID to team document in firebase
-                            teamsRef.document(teams[position].id).update(Constants.PROJECTS_FIELD, FieldValue.arrayUnion(snapshot.id))
-                        }
+                    //Add project to project collection in firebase
+                    projectsRef.add(addedProject).addOnSuccessListener { snapshot: DocumentReference ->
+                        //Add project ID to team document in firebase
+                        teamsRef.document(team!!.id).update(Constants.PROJECTS_FIELD, FieldValue.arrayUnion(snapshot.id))
+                    }
+                } else {
+                    project?.projectTitle = view.edit_text_project_name.text.toString()
+                    project?.projectDescription = view.edit_text_project_description.text.toString()
+                    projectsRef.document(project!!.id).set(project)
+                }
             }
-            else
-            {
-                var addedProject = projects[childPosition]
-                addedProject.projectTitle = view.edit_text_project_name.text.toString()
-                addedProject.projectDescription = view.edit_text_project_description.text.toString()
-   
-                projectsRef.document(projects[childPosition].id).set(addedProject)
-            }
-        }
-        builder.setNegativeButton(android.R.string.cancel, null)
-
-        if(childPosition != -1) {
-            builder.setNeutralButton("Delete") { _,_ ->
-                confirmDeleteModal(projects[childPosition].id)
-            }
-        }
-
-        userObject?.let {
-            if(userObject?.statuses?.get(teams[position].id) == Constants.OWNER)
-            {
-                builder.create().show()
-            }
-            else
-            {
-                Snackbar.make(viewNavDrawer, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
-            }
-
-        } ?: run{
+            builder.setNegativeButton(android.R.string.cancel, null)
+            builder.create().show()
+        } else {
             Snackbar.make(viewNavDrawer, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
         }
-//        val parentLayout = android.R.id.content as View
-//        Snackbar.make(parentLayout, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
-//        builder.create().show()
     }
 
-    private fun confirmDeleteModal(itemId : String)
-    {
+    private fun confirmDeleteModal(project: ProjectObject, team: TeamObject)    {
         val builder = AlertDialog.Builder(context)
         builder.setTitle(R.string.deleteProject)
         builder.setMessage(R.string.deleteProjectMessage)
 
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
-            removeProject(itemId)
+            removeProject(project, team)
         }
 
         builder.setNegativeButton(android.R.string.cancel, null) //Do Nothing
 
         builder.create().show()
+    }
+
+    private fun removeProject(project: ProjectObject, team: TeamObject) {
+        //Delete Tasks in task ref
+        deleteTaskReferences(project.taskReferences)
+        //Delete Project in project ref
+        projectsRef.document(project.id).delete().addOnSuccessListener {
+            //delete Project from ref in team Ref
+            teamsRef.document(team.id).update("projectReferences", FieldValue.arrayRemove(project.id))
+        }
     }
 
     interface OnNavDrawerListener {
