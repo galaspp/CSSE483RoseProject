@@ -94,7 +94,10 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         }
 
         expListView.setOnItemLongClickListener { parent, view, position, id ->
-            adapter.showCreateProjectModal(position - 1, team.projects[position - 1], team)
+            adapter.showCreateProjectModal(position - 1,
+                    if(position<0) team.projects[position - 1] else null,
+                    team
+            )
             true
         }
     }
