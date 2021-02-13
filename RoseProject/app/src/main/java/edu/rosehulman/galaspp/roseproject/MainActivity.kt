@@ -1,6 +1,5 @@
 package edu.rosehulman.galaspp.roseproject
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -48,19 +47,17 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     // Request code for launching the sign in Intent.
     private val RC_SIGN_IN = 1
     private val RC_ROSEFIRE_LOGIN = 1001
-
-
+    // Firebase References
     private val membersRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
     private val teamsRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.TEAMS_COLLECTION)
-
+    //Views
     override lateinit var fab: FloatingActionButton
     private lateinit var appBar : AppBarLayout
-
-    lateinit var userID: String
+    //Useful global objects
     lateinit var userObject: MemberObject
     lateinit var navAdapter: NavDrawerAdapter
 
@@ -89,7 +86,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         create_new_team_button.setOnClickListener{
             showCreateOrEditTeamModal(-1, navAdapter)
         }
-
 
         //Setup
         appBar = app_bar_view
@@ -132,7 +128,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         }
     }
 
-    //adds one profile to backstack
+    //FRAGMENTS
     private fun openProfile(user: MemberObject){
         //Prevent multiple profiles being added to backstack
         val backStackSize = supportFragmentManager.backStackEntryCount
@@ -153,50 +149,39 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         ft.replace(R.id.fragment_container, fragment)
         if(addToBackStack) ft.addToBackStack(name)
         ft.commit()
-//        Log.d(Constants.TAG, "Fragments: ${supportFragmentManager.fragments}")
     }
+
     override fun removeCurrentFragment(){
         onBackPressed()
     }
 
+    //MODALS
     override fun onEditTeamItemSelected(position: Int, adapter: NavDrawerAdapter) {
         showCreateOrEditTeamModal(position, adapter)
     }
 
-    private fun showCreateOrEditTeamModal(position: Int = -1, adapterNav: NavDrawerAdapter)
-    {
+    private fun showCreateOrEditTeamModal(position: Int = -1, adapterNav: NavDrawerAdapter){
+        //Create Builder
         val builder = AlertDialog.Builder(this)
-        //DONE: Prepopulate items as needed
-        if(position != -1) {
-            builder.setTitle("Edit Team?")
-        } else {
-            builder.setTitle("Create Team?")
-        }
-
+        builder.setTitle( if(position!=-1) "Edit Team" else "Create Team")
         val view = LayoutInflater.from(this).inflate(R.layout.create_team_modal, null, false)
         builder.setView(view)
-
-        //DONE: Add Recycler View Layout
-        //Maybe add to a different file
+        //Add Recycler View Layout
         val recyclerView = view.create_edit_team_recycler_view
         val adapter = CreateEditTeamAdapter(this)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
-
+        //Add Listener to add Members
         view.create_team_add_members_modal.setOnClickListener{
             showAddRemoveMemberModal(adapter, view, position, adapterNav)
         }
-
-        if(position != -1)
-        {
+        if(position != -1){
             view.edit_text_team_name.setText(adapterNav.getTeamDetails(position).teamName)
             view.edit_text_team_description.setText(adapterNav.getTeamDetails(position).teamDescription)
             membersRef.get().addOnSuccessListener {
-                for(snapshot in it)
-                {
-                    if(adapterNav.getTeamDetails(position).teamMemberReferences.contains(snapshot.id))
-                    {
+                for(snapshot in it){
+                    if(adapterNav.getTeamDetails(position).teamMemberReferences.contains(snapshot.id)){
                         val memberObject = MemberObject.fromSnapshot(snapshot)
                         if(memberObject.statuses[adapterNav.getTeamDetails(position).id] == Constants.OWNER)
                             adapter.addMember(memberObject, snapshot.id, 1)
@@ -205,26 +190,20 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                     }
                 }
             }
-//            adapter.setListOfMembers(adapterNav.getTeamDetails(position).members)
-//            adapter.setListOfMembers(adapterNav.getTeamDetails(position).members)
         }
 
+        //Set Buttons
         builder.setPositiveButton("Save") { _, _ ->
             //DONE: Create or Update Team Here
             if(position == -1){
-                membersRef.whereEqualTo("id", userID).get().addOnSuccessListener {
-                    userObject = MemberObject.fromSnapshot(it.documents[0])
-                    val list = adapter.getMemberObjectIds()
-                    val statusList = adapter.getMemberStatusList()
-                    list.add(userObject.id)
-                    adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString(),
-                            view.edit_text_team_description.text.toString(),
-                            list
-                    ), list, statusList)
-                }
-
-            }
-            else{
+                val list = adapter.getMemberObjectIds()
+                val statusList = adapter.getMemberStatusList()
+                list.add(userObject.id)
+                adapterNav.addTeam(TeamObject(view.edit_text_team_name.text.toString(),
+                        view.edit_text_team_description.text.toString(),
+                        list
+                ), list, statusList)
+            } else{
                 val list = adapter.getMemberObjectIds()
                 val statusList = adapter.getMemberStatusList()
                 adapterNav.editTeamAtPosition(position,
@@ -232,16 +211,11 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                         view.edit_text_team_description.text.toString(),
                         adapter.getMemberObjectIds()
                 )
-
-                for(i in 0 until list.size)
-                {
+                for(i in 0 until list.size){
                     var nestedData: HashMap<String, String>
-                    if(statusList[i] == 0)
-                    {
+                    if(statusList[i] == 0){
                         nestedData = hashMapOf(adapterNav.getTeamDetails(position).id to Constants.MEMBER)
-                    }
-                    else
-                    {
+                    } else {
                         nestedData = hashMapOf(adapterNav.getTeamDetails(position).id to Constants.OWNER)
                     }
                     val data = hashMapOf(Constants.STATUSES_FIELD to nestedData)
@@ -249,22 +223,16 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 }
             }
         }
-        membersRef.document(userID).get().addOnSuccessListener {
-            val memberObject = MemberObject.fromSnapshot(it)
-            if((position != -1 && memberObject.statuses[navAdapter.getTeamDetails(position).id] == Constants.OWNER) || position == -1) {
-                builder.setNegativeButton(android.R.string.cancel, null)
-                builder.create().show()
-            }
-            else
-            {
-                val parentLayout = findViewById<View>(android.R.id.content)
-                Snackbar.make(parentLayout, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
-            }
+        //Check permissions for current user to edit or create a team
+        if((position != -1 && userObject.statuses[navAdapter.getTeamDetails(position).id] == Constants.OWNER) || position == -1) {
+            builder.setNegativeButton(android.R.string.cancel, null)
+            builder.create().show()
+        } else {
+            val parentLayout = findViewById<View>(android.R.id.content)
+            Snackbar.make(parentLayout, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
         }
-//        builder.setNegativeButton(android.R.string.cancel, null)
-//        builder.create().show()
-    }
 
+    }
 
     private fun showAddRemoveMemberModal(adapter: CreateEditTeamAdapter, addTeamView: View, position: Int, adapterNav: NavDrawerAdapter){
         val builder = AlertDialog.Builder(this)
@@ -273,7 +241,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         builder.setView(view)
 
         //Set Autocomplete
-        val autoAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.select_dialog_item, getMembers())
+        val autoAdapter = ArrayAdapter(this, android.R.layout.select_dialog_item, getAllMemberNames())
         view.edit_text_member_username.threshold = 1
         view.edit_text_member_username.setAdapter(autoAdapter)
 
@@ -284,13 +252,12 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
 
         builder.setPositiveButton(R.string.add) { _, _ ->
             membersRef.whereEqualTo("name", view.edit_text_member_username.text.toString()).get()
-                    .addOnSuccessListener {
-                        if(!it.isEmpty){
-                            adapter.addMember(MemberObject.fromSnapshot(it.documents[0]), it.documents[0].id, view.userPermissionSpinner.selectedItemPosition)
-                        }
-                        else{
-                            Snackbar.make(addTeamView, "User ${view.edit_text_member_username.text} does not exist", Snackbar.LENGTH_LONG).show()
-                        }
+                .addOnSuccessListener {
+                    if(!it.isEmpty){
+                        adapter.addMember(MemberObject.fromSnapshot(it.documents[0]), it.documents[0].id, view.userPermissionSpinner.selectedItemPosition)
+                    } else{
+                        Snackbar.make(addTeamView, "User ${view.edit_text_member_username.text} does not exist", Snackbar.LENGTH_LONG).show()
+                    }
             }
         }
         builder.setNeutralButton(android.R.string.cancel, null)
@@ -300,15 +267,17 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         builder.create().show()
     }
 
-    private fun getMembers() : ArrayList<String> {
+    private fun getAllMemberNames() : ArrayList<String> {
         //Access members reference and extract name of each user, return in array
         val ret = ArrayList<String>()
         membersRef.get().addOnSuccessListener { snapshot: QuerySnapshot ->
             for (doc in snapshot) ret.add(MemberObject.fromSnapshot(doc).name)
+            ret.remove(userObject.name)//Prevents adding self to list and changing status
         }
         return ret
     }
 
+    //AUTHENTICATION
     override fun onStart() {
         super.onStart()
         auth.addAuthStateListener(authStateListener)
@@ -332,7 +301,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 Log.d(Constants.TAG, "Email: ${user.email}")
                 Log.d(Constants.TAG, "Phone: ${user.phoneNumber}")
                 Log.d(Constants.TAG, "Photo URL: ${user.photoUrl}")
-                userID = user.uid
+                val userID = user.uid
                 membersRef.whereEqualTo("id", userID).get().addOnSuccessListener {
                     if(it.isEmpty){
                         Log.d(Constants.TAG, "New User")

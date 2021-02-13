@@ -56,7 +56,6 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
                                 getProjectsFromIDs(team.projectReferences, team)
                                 teams.add(0, team)
                                 notifyItemInserted(0)
-                                Log.d(Constants.TAG, "Item Inserted in Nav Drawer, teamSize: ${teams.size}")
                             }
                             DocumentChange.Type.REMOVED -> {
                                 val pos = teams.indexOfFirst { team.id == it.id }
@@ -76,7 +75,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
             }
         memberReturnReference = memberRef.addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
             if(exception != null) {
-                Log.e("Nav Drawer Error", "Listen Error: $exception")
+                Log.e("NavDrawer MemRef Error ", "Listen Error: $exception")
                 return@addSnapshotListener
             }
             if (snapshot != null) {
