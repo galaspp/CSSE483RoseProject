@@ -17,7 +17,7 @@ import edu.rosehulman.galaspp.roseproject.ui.project.ProjectObject
 import edu.rosehulman.galaspp.roseproject.ui.project.TaskObject
 import kotlinx.android.synthetic.main.create_project_modal.view.*
 
-class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener, var userObject : MemberObject?) : RecyclerView.Adapter<NavDrawerHolder>() {
+class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener, var userObject : MemberObject? = null) : RecyclerView.Adapter<NavDrawerHolder>() {
     var teams : ArrayList<TeamObject> = ArrayList()
 //    var projects = HashMap<String, ArrayList<ProjectObject>>()
 
@@ -34,14 +34,15 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
 
-    private lateinit var teamReturnReference: ListenerRegistration
-    private lateinit var projectReturnReference: ListenerRegistration
-    private lateinit var taskReturnReference: ListenerRegistration
-    private lateinit var memberReturnReference: ListenerRegistration
+    private var teamReturnReference: ListenerRegistration? = null
+    private var projectReturnReference: ListenerRegistration? = null
+    private var taskReturnReference: ListenerRegistration? = null
+    private var memberReturnReference: ListenerRegistration? = null
 
     lateinit var viewNavDrawer: View
 
-    fun setup() {
+    fun setup(member: MemberObject) {
+        userObject = member
         teams.clear()
         teamReturnReference = teamsRef
             .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
@@ -227,11 +228,10 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
     }
 
     fun logout() {
-        teamReturnReference.remove()
-        projectReturnReference.remove()
-        taskReturnReference.remove()
-        memberReturnReference.remove()
-
+        teamReturnReference?.remove()
+        projectReturnReference?.remove()
+        taskReturnReference?.remove()
+        memberReturnReference?.remove()
     }
 
     private fun removeProject(itemId : String) {

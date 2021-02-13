@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val drawerRecyclerView = nav_view.recycler_view_nav_drawer
-        navAdapter = NavDrawerAdapter(nav_view.context, this, null)
+        navAdapter = NavDrawerAdapter(nav_view.context, this)
         drawerRecyclerView.adapter = navAdapter
         drawerRecyclerView.layoutManager = LinearLayoutManager(this)
         drawerRecyclerView.setHasFixedSize(true)
@@ -365,7 +365,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                     }
                 }
             }
-            navAdapter.setup()
+            navAdapter.setup(userObject)
         }
     }
 
