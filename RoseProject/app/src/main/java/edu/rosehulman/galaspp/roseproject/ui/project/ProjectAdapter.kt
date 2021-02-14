@@ -184,30 +184,20 @@ class ProjectAdapter(
                 editItem(position, task)
                 recyclerViewAdapter?.notifyDataSetChanged()
             }
-
         }
-
         builder.setNegativeButton(android.R.string.cancel, null)
-
-        if(position != -1)
-        {
+        if(position != -1){
+            Log.d(Constants.TAG, userObject)
             membersRef.document(userObject).get().addOnSuccessListener {
                 val memObj = MemberObject.fromSnapshot(it)
-                if(memObj.statuses[teamId] == Constants.OWNER)
-                {
+                if(memObj.statuses[teamId] == Constants.OWNER){
                     builder.setNeutralButton("Delete") { _, _ ->
                         confirmDeleteModal(position)
                     }
-                    builder.create().show()
                 }
-                else
-                {
-                    builder.create().show()
-                }
+                builder.create().show()
             }
-        }
-        else
-        {
+        } else{
             builder.create().show()
         }
     }
