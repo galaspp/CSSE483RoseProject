@@ -1,6 +1,7 @@
 package edu.rosehulman.galaspp.roseproject
 
 object Constants {
+
     var TAG = "test"
     var TEAMS_COLLECTION = "teams_col"
     var PROJECTS_COLLECTION = "projects_col"
@@ -21,5 +22,10 @@ object Constants {
     var OWNER = "Owner"
     var ADMIN = "Owner"
     var MEMBER = "Member"
+
+    var PHOTOID = "photoID"
+
+    val FirstName = "first"
+    val LastName = "last"
 
 }

@@ -1,6 +1,10 @@
 package edu.rosehulman.galaspp.roseproject.ui
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,28 +14,43 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.google.android.gms.tasks.Continuation
+import com.google.android.gms.tasks.Task
 import com.google.android.material.appbar.AppBarLayout
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import edu.rosehulman.galaspp.roseproject.Constants
-import edu.rosehulman.galaspp.roseproject.FragmentListener
+import com.google.firebase.firestore.*
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.UploadTask
+import com.squareup.picasso.Picasso
+import edu.rosehulman.galaspp.roseproject.*
 import edu.rosehulman.galaspp.roseproject.R
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
-import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_new_user.view.*
+import kotlinx.android.synthetic.main.fragment_profile.view.*
+import java.io.ByteArrayOutputStream
+import kotlin.random.Random
 
+@SuppressLint("UseRequireInsteadOfGet")
 class NewUserFragment(
         private var listener: FragmentListener,
         private val user: MemberObject,
         private val app_bar_view: AppBarLayout
-        ) : Fragment() {
+        ) : Fragment(), PictureHelper.PictureListener {
 
+    private lateinit var pictureHelper: PictureHelper
     private val membersRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.MEMBER_COLLECTION)
+    private val storageRef = FirebaseStorage
+        .getInstance()
+        .reference
+        .child("images")
 
-    @SuppressLint("UseRequireInsteadOfGet")
+    companion object {
+        var hasPicture = false
+        var firstGlobal = ""
+        var lastGlobal = ""
+    }
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -52,10 +71,32 @@ class NewUserFragment(
             //Returns the substring of the name before and after the space
             view.edit_first_name_view.setText(user.name.substringBefore(" "))
             view.edit_last_name_view.setText(user.name.substringAfter(" "))
+        } else{
+            view.edit_first_name_view.setText(firstGlobal)
+            view.edit_last_name_view.setText(lastGlobal)
         }
         if(user.id.length < 20){
+            //TODO: This is bad code I know - Cam
             //Set the username to userID (this only works for Rosefire login b/c userID=username)
             view.edit_username_view.setText(user.id)
+        }
+        //Set image button
+        membersRef.document(user!!.id).addSnapshotListener{
+                documentSnapshot: DocumentSnapshot?,
+                firebaseFirestoreException: FirebaseFirestoreException? ->
+            val photourl = documentSnapshot?.get(Constants.PHOTOID)
+            if(photourl!=null){
+                Picasso.get().load(photourl.toString()).into(view.profile_button_view)
+                user.photoID = photourl.toString()
+            }
+        }
+        view.profile_button_view.setOnClickListener {
+            //Save textbox data
+            firstGlobal = view.edit_first_name_view.text.toString()
+            lastGlobal = view.edit_last_name_view.text.toString()
+            //Launch Camera Intent and set hasPicture to return to new user fragment
+            hasPicture = true
+            pictureHelper.getPicture()
         }
 
         //Set Listener for done button
@@ -83,7 +124,6 @@ class NewUserFragment(
                                 Toast.LENGTH_SHORT).show()
                         } else {
                             //Save information to firebase object
-                            // TODO: Add a members object listener somewhere i think idk
                             membersRef.document(user.id).update(Constants.NAME_FIELD, "$firstName $lastName")
                             membersRef.document(user.id).update(Constants.USERNAME_FIELD, usernameText)
                             app_bar_view.isVisible = true
@@ -93,6 +133,55 @@ class NewUserFragment(
                     }
             }
         }
+
+        pictureHelper = PictureHelper(context!!, activity!!, this, this)
         return view
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        pictureHelper.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun getPictureTask(localPath: String) {
+        Log.d(Constants.TAG, "get pic task in newuwres")
+        ImageRescaleTask(localPath).execute()
+    }
+
+    inner class ImageRescaleTask(val localPath: String) : AsyncTask<Void, Void, Bitmap>() {
+        override fun doInBackground(vararg p0: Void?): Bitmap? {
+            // Reduces length and width by a factor (currently 2).
+            val ratio = 2
+            return BitmapUtils.rotateAndScaleByRatio(context!!, localPath, ratio)
+        }
+
+        override fun onPostExecute(bitmap: Bitmap?) {
+            // https://firebase.google.com/docs/storage/android/upload-files
+            storageAdd(bitmap)
+        }
+    }
+    private fun storageAdd(bitmap: Bitmap?) {
+        //Delete old picture
+        if(user?.photoID!=null){
+            FirebaseStorage.getInstance().getReferenceFromUrl(user?.photoID!!).delete()
+        }
+        val baos = ByteArrayOutputStream()
+        bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val data = baos.toByteArray()
+        val id = Math.abs(Random.nextLong()).toString()
+        val uploadTask = storageRef.child(id).putBytes(data)
+        uploadTask.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
+            if(!task.isSuccessful){
+                task.exception?.let {
+                    throw it
+                }
+            }
+            return@Continuation storageRef.child(id).downloadUrl
+        }).addOnCompleteListener{ task ->
+            if(task.isSuccessful){
+                val downloadUri = task.result
+                val map = hashMapOf(Constants.PHOTOID to downloadUri.toString())
+                membersRef.document(user!!.id).set(map, SetOptions.merge())
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package edu.rosehulman.galaspp.roseproject
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,6 +13,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -60,6 +63,8 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     //Useful global objects
     lateinit var userObject: MemberObject
     lateinit var navAdapter: NavDrawerAdapter
+    private val WRITE_EXTERNAL_STORAGE_PERMISSION = 2
+//    override var startFragment : String = Constants.WELCOME
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,7 +109,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 }
             }
         }
-
+        checkPermissions()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -129,7 +134,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     }
 
     //FRAGMENTS
-    private fun openProfile(user: MemberObject){
+    override fun openProfile(user: MemberObject){
         //Prevent multiple profiles being added to backstack
         val backStackSize = supportFragmentManager.backStackEntryCount
         if(backStackSize == 0 || supportFragmentManager.getBackStackEntryAt(backStackSize - 1).name != "profile"){
@@ -285,6 +290,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
 
     override fun onStop() {
         super.onStop()
+        Log.d(Constants.TAG, "STOPPPPED")
         auth.removeAuthStateListener(authStateListener)
     }
 
@@ -309,6 +315,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                         membersRef.document(userID).set(newMember).addOnSuccessListener {
                             userObject = newMember
                             addTeamsToUserObject()
+                            navAdapter.logout()
                             navAdapter.setup(userObject)
                             app_bar_view.isVisible = false
                             openFragment(NewUserFragment(this, userObject, app_bar_view), false, "new user")
@@ -317,9 +324,11 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                         Log.d(Constants.TAG, "Old User")
                         userObject = MemberObject.fromSnapshot(it.documents[0])
                         app_bar_view.isVisible = true
-                        openFragment(WelcomeFragment(userObject.userName), false, "welcome")
+                        startFirstFragment()
+//                        openFragment(WelcomeFragment(userObject.userName), false, "welcome")
                         navAdapter.userObject = userObject
                         addTeamsToUserObject()
+                        navAdapter.logout()
                         navAdapter.setup(userObject)
                     }
                 }
@@ -327,6 +336,20 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 openFragment(SplashFragment(), false, "splash")
                 app_bar_view.isVisible = false
             }
+        }
+    }
+
+    private fun startFirstFragment(){
+        //Used to return to fragment after a picture is retrieved from the camera or gallery
+        Log.d(Constants.TAG, "NU: ${NewUserFragment.hasPicture}")
+        if(ProfileFragment.hasPicture){
+            ProfileFragment.hasPicture = false
+            openProfile(userObject)
+        } else if(NewUserFragment.hasPicture){
+            NewUserFragment.hasPicture = false
+            openFragment(NewUserFragment(this, userObject, appBar), false, "new user")
+        } else {
+            openFragment(WelcomeFragment(userObject.userName), false, "welcome")
         }
     }
 
@@ -388,5 +411,43 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         supportFragmentManager.fragments.clear()
         Log.d(Constants.TAG, "F on backstack: ${supportFragmentManager.fragments.size}")
         auth.signOut()
+    }
+
+    // CAMERA
+    // Android’s security policy requires permissions to be requested
+    // before some features are used.
+    private fun checkPermissions() {
+        // Check to see if we already have permissions
+        if (ContextCompat
+                .checkSelfPermission(
+                    this,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // If we do not, request them from the user
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                WRITE_EXTERNAL_STORAGE_PERMISSION
+            )
+        }
+    }
+    // Callback once permissions are granted.
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        when (requestCode) {
+            WRITE_EXTERNAL_STORAGE_PERMISSION -> {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+                    Log.d(Constants.TAG, "Permission granted")
+                } else {
+                    // permission denied
+                }
+                return
+            }
+        }
     }
 }
