@@ -9,21 +9,25 @@
     tools:context=".ui.profile.ProfileFragment">
 
     <TextView
-        android:id="@+id/welcome_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/welcome"
-        android:textSize="40sp"
-        android:layout_centerInParent="true"
-        android:textStyle="bold"/>
-    <TextView
         android:id="@+id/welcome_name_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/username"
         android:textSize="40sp"
+        android:layout_marginTop="50dp"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/welcome_text_view"
         android:textStyle="bold"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your Tasks"
+        android:textSize="30sp"
+        android:layout_marginTop="50dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/welcome_name_text_view"/>
+
+    <include
+        layout="@layout/homepage_recycler_view"/>
 
 </RelativeLayout>

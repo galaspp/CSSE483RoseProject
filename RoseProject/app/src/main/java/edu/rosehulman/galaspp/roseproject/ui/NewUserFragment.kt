@@ -24,6 +24,7 @@ import com.squareup.picasso.Picasso
 import edu.rosehulman.galaspp.roseproject.*
 import edu.rosehulman.galaspp.roseproject.R
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
+import edu.rosehulman.galaspp.roseproject.ui.homepage.WelcomeFragment
 import kotlinx.android.synthetic.main.fragment_new_user.view.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
 import java.io.ByteArrayOutputStream
@@ -128,7 +129,7 @@ class NewUserFragment(
                             membersRef.document(user.id).update(Constants.USERNAME_FIELD, usernameText)
                             app_bar_view.isVisible = true
 //                            listener.removeCurrentFragment()//Used to make the fragments not overlap upon reloading welcome screen
-                            listener.openFragment(WelcomeFragment(usernameText), false, "welcome")
+                            listener.openFragment(WelcomeFragment(user, listener), false, "welcome")
                         }
                     }
             }

@@ -27,12 +27,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import edu.rosehulman.galaspp.roseproject.ui.NewUserFragment
 import edu.rosehulman.galaspp.roseproject.ui.SplashFragment
-import edu.rosehulman.galaspp.roseproject.ui.WelcomeFragment
+import edu.rosehulman.galaspp.roseproject.ui.homepage.WelcomeFragment
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.CreateEditTeamAdapter
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.NavDrawerAdapter
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.TeamObject
 import edu.rosehulman.galaspp.roseproject.ui.profile.ProfileFragment
+import edu.rosehulman.galaspp.roseproject.ui.project.ProjectFragment
 import edu.rosehulman.rosefire.Rosefire
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
@@ -158,6 +159,16 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
 
     override fun removeCurrentFragment(){
         onBackPressed()
+    }
+
+    override fun getUpdatedUser(): MemberObject? {
+        return navAdapter.userObject
+    }
+
+    override fun openProjectFromHome(teamID: String, projID: String) {
+        val team = navAdapter.teams.filter { teamObject ->  teamObject.id == teamID}[0]
+        val proj = team.projects.filter { projectObject -> projectObject.id == projID }[0]
+        openFragment(ProjectFragment.newInstance(proj, teamID, userObject.id), true, proj.projectTitle)
     }
 
     //MODALS
@@ -349,7 +360,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
             NewUserFragment.hasPicture = false
             openFragment(NewUserFragment(this, userObject, appBar), false, "new user")
         } else {
-            openFragment(WelcomeFragment(userObject.userName), false, "welcome")
+            openFragment(WelcomeFragment(userObject, this), false, "welcome")
         }
     }
 

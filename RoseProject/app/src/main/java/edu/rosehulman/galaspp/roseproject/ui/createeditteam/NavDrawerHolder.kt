@@ -10,6 +10,7 @@ import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
+import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.FragmentListener
 import edu.rosehulman.galaspp.roseproject.R
 import edu.rosehulman.galaspp.roseproject.ui.CustomExpandableListAdapter
@@ -94,10 +95,10 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         }
 
         expListView.setOnItemLongClickListener { parent, view, position, id ->
-            adapter.showCreateProjectModal(position - 1,
-                    if(position<0) team.projects[position - 1] else null,
-                    team
-            )
+            Log.d(Constants.TAG, "position $position")
+            Log.d(Constants.TAG, "position ${team.projects[position - 1].projectTitle}")
+            val index = position - 1
+            adapter.showCreateProjectModal(index, team.projects[position - 1], team)
             true
         }
     }

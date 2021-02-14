@@ -9,6 +9,7 @@ object Constants {
     var MEMBER_COLLECTION = "members_col"
 
     var PROJECTS_FIELD = "projectReferences"
+    var TASKS_FIELD = "taskReferences"
     var STATUSES_FIELD = "statuses"
     var USERNAME_FIELD = "userName"
     var NAME_FIELD = "name"

@@ -270,7 +270,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
     }
 
 
-    fun showCreateProjectModal(childPosition: Int = -1,  project: ProjectObject? = null, team: TeamObject? = null) {
+    fun showCreateProjectModal(childPosition: Int = -1,  project: ProjectObject?, team: TeamObject?) {
         //Check if user has permision to create/edit project within the team
         if(userObject?.statuses?.get(team?.id) == Constants.OWNER) {
             val builder = AlertDialog.Builder(context)
@@ -278,6 +278,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
             val view = LayoutInflater.from(context).inflate(R.layout.create_project_modal, null, false)
             builder.setView(view)
             if(childPosition != -1){
+                Log.d(Constants.TAG, project!!.projectTitle)
                 view.edit_text_project_name.setText(project!!.projectTitle)
                 view.edit_text_project_description.setText(project.projectDescription)
                 builder.setNeutralButton("Delete") { _,_ ->

@@ -29,7 +29,7 @@ class ProfileAdapter(
 
     fun add(profileTeamModel: ProfileTeamModel){
         userTeams.add(0, profileTeamModel)
-        notifyItemChanged(0)
+        notifyItemInserted(0)
     }
 
     private fun remove(position: Int){

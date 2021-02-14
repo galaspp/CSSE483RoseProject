@@ -9,4 +9,6 @@ interface FragmentListener {
     fun openFragment(fragment: Fragment, addToBackStack: Boolean = true, name: String = "fragment_name")
     fun openProfile(user: MemberObject)
     fun removeCurrentFragment()
+    fun getUpdatedUser(): MemberObject?
+    fun openProjectFromHome(teamID: String, projID: String)
 }
