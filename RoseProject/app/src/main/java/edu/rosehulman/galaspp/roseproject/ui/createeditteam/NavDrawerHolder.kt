@@ -96,9 +96,13 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
 
         expListView.setOnItemLongClickListener { parent, view, position, id ->
             Log.d(Constants.TAG, "position $position")
-            Log.d(Constants.TAG, "position ${team.projects[position - 1].projectTitle}")
             val index = position - 1
-            adapter.showCreateProjectModal(index, team.projects[position - 1], team)
+            if(index < 0){
+                adapter.showCreateProjectModal(index, null, team)
+            } else {
+                adapter.showCreateProjectModal(index, team.projects[position - 1], team)
+
+            }
             true
         }
     }

@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -33,11 +32,11 @@ class ProjectAdapter(
     private val tasksRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.TASKS_COLLECTION)
-    private val memberRef = FirebaseFirestore
+    private val membersRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
-
     override fun getItemCount() = project.projectTasks.filter { s -> s.currentStatus == itemFilter }.size//tasks.size
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProjectViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.task_row_view, parent, false)
@@ -106,6 +105,11 @@ class ProjectAdapter(
 
         val view = LayoutInflater.from(context).inflate(R.layout.create_edit_task_modal, null, false)
         builder.setView(view)
+
+        //Set Autocomplete
+        val autoAdapter = ArrayAdapter(context, android.R.layout.select_dialog_item, getAllMemberNames())
+        view.edit_text_assign_description.threshold = 1
+        view.edit_text_assign_description.setAdapter(autoAdapter)
 
         var arrayVal = view.resources.getStringArray(R.array.task_status_array)
         var aa = ArrayAdapter(context, android.R.layout.simple_spinner_item, arrayVal)
@@ -187,7 +191,7 @@ class ProjectAdapter(
 
         if(position != -1)
         {
-            memberRef.document(userObject).get().addOnSuccessListener {
+            membersRef.document(userObject).get().addOnSuccessListener {
                 val memObj = MemberObject.fromSnapshot(it)
                 if(memObj.statuses[teamId] == Constants.OWNER)
                 {
@@ -206,6 +210,20 @@ class ProjectAdapter(
         {
             builder.create().show()
         }
+    }
+
+    private fun getAllMemberNames() : ArrayList<String> {
+        //Access members reference and extract name of each user, return in array
+        val ret = ArrayList<String>()
+        membersRef.get().addOnSuccessListener { snapshot: QuerySnapshot ->
+            for (doc in snapshot){
+                //prevent user from adding self
+                if(doc.id != userObject){
+                    ret.add(MemberObject.fromSnapshot(doc).name)
+                }
+            }
+        }
+        return ret
     }
 
     private fun confirmDeleteModal(position : Int)

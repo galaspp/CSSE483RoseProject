@@ -83,7 +83,7 @@ class ProfileFragment : Fragment(), PictureHelper.PictureListener {
                 documentSnapshot: DocumentSnapshot?,
                 firebaseFirestoreException: FirebaseFirestoreException? ->
             val photourl = documentSnapshot?.get(Constants.PHOTOID)
-            if(photourl!=null){
+            if(photourl!=null && photourl.toString().isNotEmpty()){
                 Picasso.get().load(photourl.toString()).into(view.profile_image)
             }
         }
