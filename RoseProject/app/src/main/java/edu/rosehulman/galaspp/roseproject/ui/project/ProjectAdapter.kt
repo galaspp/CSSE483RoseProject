@@ -217,10 +217,7 @@ class ProjectAdapter(
         val ret = ArrayList<String>()
         membersRef.get().addOnSuccessListener { snapshot: QuerySnapshot ->
             for (doc in snapshot){
-                //prevent user from adding self
-                if(doc.id != userObject){
-                    ret.add(MemberObject.fromSnapshot(doc).name)
-                }
+                ret.add(MemberObject.fromSnapshot(doc).name)
             }
         }
         return ret

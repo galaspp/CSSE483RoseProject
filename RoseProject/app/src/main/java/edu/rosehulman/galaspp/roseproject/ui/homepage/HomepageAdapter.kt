@@ -59,6 +59,8 @@ class HomepageAdapter(
                 }
             }
         }
+        userTasks.sortedBy { it.task.lastTouched }
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomepageViewHolder {

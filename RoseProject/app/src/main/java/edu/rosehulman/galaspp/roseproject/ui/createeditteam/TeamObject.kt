@@ -14,11 +14,10 @@ data class TeamObject(
     var projectReferences: ArrayList<String> = ArrayList()
 ) {
     @get: Exclude var projects = ArrayList<ProjectObject>()
-//    @get: Exclude var members: ArrayList<MemberObject> = ArrayList()
     @get: Exclude var id = ""
-//    @ServerTimestamp var lastTouched: Timestamp? = null
+    @ServerTimestamp var lastTouched: Timestamp? = null
     companion object {
-//        const val LAST_TOUCHED_KEY = "lastTouched"
+        const val LAST_TOUCHED_KEY = "lastTouched"
         fun fromSnapshot(snapshot: DocumentSnapshot): TeamObject {
             val team = snapshot.toObject(TeamObject::class.java)!!
             team.id = snapshot.id
