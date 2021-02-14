@@ -50,6 +50,7 @@ class NewUserFragment(
         var hasPicture = false
         var firstGlobal = ""
         var lastGlobal = ""
+        var userGlobal = ""
     }
 
     override fun onCreateView(
@@ -80,6 +81,8 @@ class NewUserFragment(
             //TODO: This is bad code I know - Cam
             //Set the username to userID (this only works for Rosefire login b/c userID=username)
             view.edit_username_view.setText(user.id)
+        } else {
+            view.edit_username_view.setText(userGlobal)
         }
         //Set image button
         membersRef.document(user!!.id).addSnapshotListener{
@@ -95,6 +98,7 @@ class NewUserFragment(
             //Save textbox data
             firstGlobal = view.edit_first_name_view.text.toString()
             lastGlobal = view.edit_last_name_view.text.toString()
+            userGlobal = view.edit_username_view.text.toString()
             //Launch Camera Intent and set hasPicture to return to new user fragment
             hasPicture = true
             pictureHelper.getPicture()
