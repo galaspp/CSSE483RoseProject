@@ -168,10 +168,10 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         return navAdapter.userObject
     }
 
-    override fun openProjectFromHome(teamID: String, projID: String) {
+    override fun openProjectFromHome(teamID: String, projID: String, taskType : Int) {
         val team = navAdapter.teams.filter { teamObject ->  teamObject.id == teamID}[0]
         val proj = team.projects.filter { projectObject -> projectObject.id == projID }[0]
-        openFragment(ProjectFragment.newInstance(proj, teamID, userObject.id), true, proj.projectTitle)
+        openFragment(ProjectFragment.newInstance(proj, teamID, userObject.id, taskType), true, proj.projectTitle)
     }
 
     //MODALS

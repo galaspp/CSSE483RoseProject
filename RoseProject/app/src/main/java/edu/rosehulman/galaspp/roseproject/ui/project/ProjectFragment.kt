@@ -12,11 +12,13 @@ import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.FragmentListener
 import edu.rosehulman.galaspp.roseproject.R
 import kotlinx.android.synthetic.main.fragment_project.view.*
+import kotlin.properties.Delegates
 
 
 private const val ARG_PROJECT = "project"
 private const val ARG_TEAM = "team"
 private const val ARG_USER = "user"
+private const val ARG_TYPE = "type"
 
 class ProjectFragment : Fragment() {
 
@@ -24,15 +26,17 @@ class ProjectFragment : Fragment() {
     private lateinit var adapter: ProjectAdapter
     private lateinit var userID: String
     private lateinit var teamID: String
+    private var taskType: Int = 0
 
     companion object {
         @JvmStatic
-        fun newInstance(project: ProjectObject, userID: String, teamID: String) =
+        fun newInstance(project: ProjectObject, userID: String, teamID: String, taskType: Int = 0) =
                 ProjectFragment().apply {
                     arguments = Bundle().apply {
                         putParcelable(ARG_PROJECT, project)
                         putString(ARG_USER, userID)
                         putString(ARG_TEAM, teamID)
+                        putInt(ARG_TYPE, taskType)
                     }
                 }
     }
@@ -43,6 +47,7 @@ class ProjectFragment : Fragment() {
             project = it.getParcelable<ProjectObject>(ARG_PROJECT)
             userID = it.getString(ARG_USER).toString()
             teamID = it.getString(ARG_TEAM).toString()
+            taskType = it.getInt(ARG_TYPE)
         }
     }
 
@@ -62,6 +67,7 @@ class ProjectFragment : Fragment() {
         val aa = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, arrayVal)
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         view.project_fragment_spinner.adapter = aa
+        view.project_fragment_spinner.setSelection(taskType)
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.project_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)

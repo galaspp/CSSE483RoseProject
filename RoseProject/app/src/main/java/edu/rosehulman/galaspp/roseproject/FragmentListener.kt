@@ -10,5 +10,5 @@ interface FragmentListener {
     fun openProfile(user: MemberObject)
     fun removeCurrentFragment()
     fun getUpdatedUser(): MemberObject?
-    fun openProjectFromHome(teamID: String, projID: String)
+    fun openProjectFromHome(teamID: String, projID: String, taskType : Int)
 }

@@ -89,7 +89,8 @@ class HomepageAdapter(
     }
 
     fun goToProject(position: Int) {
-        listener.openProjectFromHome(userTasks[position].teamID, userTasks[position].projID)
+        val tw = userTasks[position]
+        listener.openProjectFromHome(tw.teamID, tw.projID, tw.task.currentStatus)
     }
 
     class TaskWrapper(val task: TaskObject, val projectName: String, val projID: String, val teamName : String, val teamID: String)
