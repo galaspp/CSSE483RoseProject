@@ -34,6 +34,9 @@ class ProjectAdapter(
     private val tasksRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.TASKS_COLLECTION)
+    private val teamsRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.TEAMS_COLLECTION)
     private val membersRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
@@ -93,15 +96,22 @@ class ProjectAdapter(
                 }
         notifyItemRemoved(position)
     }
+    @Suppress("UNCHECKED_CAST")
     fun showCreateorEditTaskModal(position: Int = -1, taskName: String = "", urgency: String = "",
                                   assignedTo: String = "", status: Int = 0){
-        //Access members reference and extract name of each user, return in array
+        //Access teams reference and extract name of each user in team, send to modal
         val allNames = ArrayList<String>()
-        membersRef.get().addOnSuccessListener { snapshot: QuerySnapshot ->
-            for (doc in snapshot){
-                allNames.add(MemberObject.fromSnapshot(doc).name)
+        teamsRef.document(teamId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
+            val allIDs = snapshot[Constants.MEMBERS_FIELD] as ArrayList<String>
+            for(index in 0 until allIDs.size){
+                membersRef.document(allIDs[index]).get().addOnSuccessListener {
+                    Log.d(Constants.TAG, it["name"].toString())
+                    allNames.add(it["name"] as String)
+                    if(index == allIDs.size-1){
+                        showCreateorEditTaskModalHelper(position, taskName, urgency, assignedTo, status, allNames)
+                    }
+                }
             }
-            showCreateorEditTaskModalHelper(position, taskName, urgency, assignedTo, status, allNames)
         }
     }
 
