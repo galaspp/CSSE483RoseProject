@@ -8,9 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.*
 import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.FragmentListener
 import edu.rosehulman.galaspp.roseproject.R
@@ -24,6 +22,9 @@ class WelcomeFragment(var user: MemberObject, val listener : FragmentListener) :
     private val tasksRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.TASKS_COLLECTION)
+    private val membersRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.MEMBER_COLLECTION)
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -42,13 +43,24 @@ class WelcomeFragment(var user: MemberObject, val listener : FragmentListener) :
         adapter = HomepageAdapter(context, user, listener)
         recyclerView.adapter = adapter
         reload()
+        membersRef.addSnapshotListener { snapshot: QuerySnapshot? , error ->
+            for(docChange in snapshot?.documentChanges!!){
+                val mo = MemberObject.fromSnapshot(docChange.document)
+                if(mo.id == user.id && mo.statuses != user.statuses){
+                    this.user = mo
+                    Log.d(Constants.TAG, mo.statuses.toString())
+                    reload()
+                }
+            }
+
+        }
 
         return view
     }
 
-    private fun reload(){
-       Log.d(Constants.TAG, "RELOAD")
-        this.user = listener.getUpdatedUser()!!
+    fun reload() {
+        Log.d(Constants.TAG, "RELOAD")
         adapter.reload(user)
     }
+
 }

@@ -42,7 +42,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
     fun setup(member: MemberObject) {
         userObject = member
         teams.clear()
-        teamReturnReference = teamsRef.orderBy(TeamObject.LAST_TOUCHED_KEY, Query.Direction.ASCENDING)
+        teamReturnReference = teamsRef.orderBy(TeamObject.LAST_TOUCHED_KEY, Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
                 if(exception != null) {
                     Log.e("Nav Drawer Error", "Listen Error: $exception")
@@ -54,8 +54,8 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
                         when (teamChange.type) {
                             DocumentChange.Type.ADDED -> {
                                 getProjectsFromIDs(team.projectReferences, team)
-                                teams.add(team)
-                                notifyItemInserted(teams.size-1)
+                                teams.add(0, team)
+                                notifyItemInserted(0)
                             }
                             DocumentChange.Type.REMOVED -> {
                                 val pos = teams.indexOfFirst { team.id == it.id }
@@ -95,7 +95,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
     }
     private fun deleteTaskReferences(taskReferences: ArrayList<String>) {
         for( refID in taskReferences ){
-            projectsRef.document(refID).delete()
+            tasksRef.document(refID).delete()
         }
     }
 
@@ -121,10 +121,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
                                     notifyDataSetChanged()
                                 }
                                 DocumentChange.Type.REMOVED -> {
-//                                val pos = teams.indexOfFirst { team.id == it.id }
-//                                deleteProjectReferences(team.projectReferences)
-//                                teams.removeAt(pos)
-//                                notifyItemRemoved(pos)
+                                    deleteTaskReferences(po.taskReferences)
                                 }
                                 DocumentChange.Type.MODIFIED -> {
                                     val pos = tm.projects.indexOfFirst { po.id == it.id }
@@ -330,6 +327,28 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
             //delete Project from ref in team Ref
             teamsRef.document(team.id).update("projectReferences", FieldValue.arrayRemove(project.id))
         }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun delete(position: Int) {
+//        val teamID = teams[position].id
+//        userObject?.id?.let { userID ->
+//            memberRef.document(userID).get().addOnSuccessListener {
+//                val statuses = it[Constants.STATUSES_FIELD] as MutableMap<String, String>
+//                statuses.remove(teamID)
+//                memberRef.document(userID).update(Constants.STATUSES_FIELD, statuses)
+//            }
+//        }
+//        teamsRef.document(teamID).delete()
+        val teamID = teams[position].id
+        memberRef.get().addOnSuccessListener { snapshot: QuerySnapshot ->
+            for(snap in snapshot.documents) {
+                val statuses = snap[Constants.STATUSES_FIELD] as MutableMap<String, String>
+                statuses.remove(teamID)
+                memberRef.document(snap.id).update(Constants.STATUSES_FIELD, statuses)
+            }
+        }
+        teamsRef.document(teamID).delete()
     }
 
     interface OnNavDrawerListener {

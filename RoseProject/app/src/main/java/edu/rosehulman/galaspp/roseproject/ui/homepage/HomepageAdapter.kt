@@ -50,7 +50,7 @@ class HomepageAdapter(
                         val projectName = projectSnapshot["projectTitle"] as String
                         for(taskID in tasks) {
                             tasksRef.document(taskID).get().addOnSuccessListener{ taskSnapshot: DocumentSnapshot ->
-                                if(taskSnapshot.get("assignedTo") == user.name){
+                                if(taskSnapshot.get("assignedTo") == user.name ){
                                     add(TaskWrapper(TaskObject.fromSnapshot(taskSnapshot), projectName, projID, teamName, teamID))
                                 }
                             }
