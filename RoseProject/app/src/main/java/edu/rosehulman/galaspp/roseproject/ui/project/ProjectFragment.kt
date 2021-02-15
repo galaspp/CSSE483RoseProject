@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.FragmentListener
 import edu.rosehulman.galaspp.roseproject.R
 import kotlinx.android.synthetic.main.fragment_project.view.*
-import kotlin.properties.Delegates
 
 
 private const val ARG_PROJECT = "project"

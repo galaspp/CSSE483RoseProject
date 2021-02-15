@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -91,9 +93,20 @@ class ProjectAdapter(
                 }
         notifyItemRemoved(position)
     }
+    fun showCreateorEditTaskModal(position: Int = -1, taskName: String = "", urgency: String = "",
+                                  assignedTo: String = "", status: Int = 0){
+        //Access members reference and extract name of each user, return in array
+        val allNames = ArrayList<String>()
+        membersRef.get().addOnSuccessListener { snapshot: QuerySnapshot ->
+            for (doc in snapshot){
+                allNames.add(MemberObject.fromSnapshot(doc).name)
+            }
+            showCreateorEditTaskModalHelper(position, taskName, urgency, assignedTo, status, allNames)
+        }
+    }
 
-    fun showCreateorEditTaskModal(position:Int = -1)
-    {
+    fun showCreateorEditTaskModalHelper(position: Int = -1, taskName: String = "", urgency: String = "",
+                                  assignedTo: String = "", status: Int = 0, allNames: ArrayList<String>){
         val builder = AlertDialog.Builder(context)
         var recyclerViewAdapter: TaskLogAdapter? = null
         //TODO: Change title based on whether editing or creating team
@@ -107,18 +120,22 @@ class ProjectAdapter(
         builder.setView(view)
 
         //Set Autocomplete
-        val autoAdapter = ArrayAdapter(context, android.R.layout.select_dialog_item, getAllMemberNames())
+        val autoAdapter = ArrayAdapter(context, android.R.layout.select_dialog_item, allNames)
         view.edit_text_assign_description.threshold = 1
         view.edit_text_assign_description.setAdapter(autoAdapter)
 
-        var arrayVal = view.resources.getStringArray(R.array.task_status_array)
-        var aa = ArrayAdapter(context, android.R.layout.simple_spinner_item, arrayVal)
+        val arrayVal = view.resources.getStringArray(R.array.task_status_array)
+        val aa = ArrayAdapter(context, android.R.layout.simple_spinner_item, arrayVal)
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         view.spinner_task.adapter = aa
 
+        //Fill/Refill text boxes - used to refill if assignedTo user does not exists
+        view.edit_text_task_name.setText(taskName)
+        view.edit_text_urgency_description.setText(urgency)
+        view.edit_text_assign_description.setText(assignedTo)
+        view.spinner_task.setSelection(status)
 
-        if(position != -1)
-        {
+        if(position != -1){
             view.edit_text_task_name.setText(project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].name)
             view.edit_text_assign_description.setText(project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].assignedTo)
             view.edit_text_urgency_description.setText(project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].urgency.toString())
@@ -139,53 +156,57 @@ class ProjectAdapter(
                 if(view.edit_text_log_hours.text.toString() != "")
                     hours = view.edit_text_log_hours.text.toString().toDouble()
                 project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours = project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours + hours
-
                 project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog.add("Logged hours $hours Total Hours: ${project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours}")
                 editItem(position, project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position])
                 recyclerViewAdapter.notifyDataSetChanged()
                 view.edit_text_log_hours.setText("")
             }
-
         }
 
         builder.setPositiveButton("Save") { _, _ ->
-            var urgancy = 0
-
-            if(view.edit_text_urgency_description.text.toString() != "")
-                urgancy = view.edit_text_urgency_description.text.toString().toInt()
-
-
-            if(position == -1)
-            {
-                val arrayList: ArrayList<String> = arrayListOf("Task Created")
-                val task = TaskObject(view.edit_text_task_name.text.toString(),
-                    view.edit_text_assign_description.text.toString(),
-                    urgancy,
-                    view.spinner_task.selectedItemPosition,
-                    0.0,
-                    arrayList
-                )
-                add(task)
-            }
-            else
-            {
-                if(view.spinner_task.selectedItemPosition != project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].currentStatus)
-                {
-                    project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog.add("Changed Status To ${arrayVal[view.spinner_task.selectedItemPosition]}")
+            val assignedMember = view.edit_text_assign_description.text.toString()
+            if (!allNames.contains(assignedMember)){
+                val taskNameOld = view.edit_text_task_name.text.toString()
+                val urgencyOld = view.edit_text_urgency_description.text.toString()
+                val assignedToOld = view.edit_text_assign_description.text.toString()
+                val statusOld = view.spinner_task.selectedItemPosition
+                showCreateorEditTaskModal(position, taskNameOld, urgencyOld, assignedToOld, statusOld)
+                Toast.makeText(context, "User: $assignedMember does not exist.", Toast.LENGTH_SHORT).show()
+            } else {
+                var urgancy = 1
+                if(view.edit_text_urgency_description.text.toString() != ""){
+                    urgancy = view.edit_text_urgency_description.text.toString().toInt()
+                    if (urgancy < 1) urgancy = 1
+                    else if (urgancy > 10) urgancy = 10
                 }
-
-                val task = TaskObject(view.edit_text_task_name.text.toString(),
-                    view.edit_text_assign_description.text.toString(),
-                    urgancy,
-                    view.spinner_task.selectedItemPosition,
-                    project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours,
-                  project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog
-                )
-                editItem(position, task)
-                recyclerViewAdapter?.notifyDataSetChanged()
+                if(position == -1){
+                    val arrayList: ArrayList<String> = arrayListOf("Task Created")
+                    val task = TaskObject(view.edit_text_task_name.text.toString(),
+                            view.edit_text_assign_description.text.toString(),
+                            urgancy,
+                            view.spinner_task.selectedItemPosition,
+                            0.0,
+                            arrayList
+                    )
+                    add(task)
+                } else {
+                    if(view.spinner_task.selectedItemPosition != project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].currentStatus) {
+                        project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog.add("Changed Status To ${arrayVal[view.spinner_task.selectedItemPosition]}")
+                    }
+                    val task = TaskObject(view.edit_text_task_name.text.toString(),
+                            view.edit_text_assign_description.text.toString(),
+                            urgancy,
+                            view.spinner_task.selectedItemPosition,
+                            project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours,
+                            project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].projectTaskLog
+                    )
+                    editItem(position, task)
+                    recyclerViewAdapter?.notifyDataSetChanged()
+                }
             }
         }
         builder.setNegativeButton(android.R.string.cancel, null)
+
         if(position != -1){
             Log.d(Constants.TAG, userObject)
             membersRef.document(userObject).get().addOnSuccessListener {
@@ -202,6 +223,7 @@ class ProjectAdapter(
         }
     }
 
+    //Reuses for task modal
     private fun getAllMemberNames() : ArrayList<String> {
         //Access members reference and extract name of each user, return in array
         val ret = ArrayList<String>()
