@@ -129,7 +129,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 true
             }
             R.id.action_profile -> {
-                fab.hide()
                 openProfile(userObject)
                 true
             }
@@ -143,7 +142,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         val backStackSize = supportFragmentManager.backStackEntryCount
         if(backStackSize == 0 || supportFragmentManager.getBackStackEntryAt(backStackSize - 1).name != "profile"){
             //Add profile fragment
-            val profileFragment = ProfileFragment.newInstance(user)
+            val profileFragment = ProfileFragment.newInstance(user, this)
             val ft = supportFragmentManager.beginTransaction()
             ft.replace(R.id.fragment_container, profileFragment)
             ft.addToBackStack("profile")

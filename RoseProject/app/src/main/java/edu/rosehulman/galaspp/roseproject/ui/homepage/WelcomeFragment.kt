@@ -32,6 +32,8 @@ class WelcomeFragment(var user: MemberObject, val listener : FragmentListener) :
     ): View? {
         val view = inflater.inflate(R.layout.fragment_welcome, container, false)
 
+        listener.fab.hide()
+
         view.welcome_name_text_view.text = "Welcome, ${user.name.substringBefore(" ")}"
         //Create recycler view for list of teams
         val recyclerView = view.findViewById<RecyclerView>(R.id.homepage_recycler_view)

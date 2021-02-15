@@ -34,7 +34,7 @@ import kotlin.random.Random
 
 private const val ARG_USER = "user"
 @SuppressLint("UseRequireInsteadOfGet")
-class ProfileFragment : Fragment(), PictureHelper.PictureListener {
+class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), PictureHelper.PictureListener {
 
     private var user: MemberObject? = null
     private lateinit var adapter: ProfileAdapter
@@ -51,8 +51,8 @@ class ProfileFragment : Fragment(), PictureHelper.PictureListener {
         var listener: AuthenticationListener? = null
         var hasPicture = false
         @JvmStatic
-        fun newInstance(user: MemberObject) =
-                ProfileFragment().apply {
+        fun newInstance(user: MemberObject, fragmentListener : FragmentListener) =
+                ProfileFragment(fragmentListener).apply {
                     arguments = Bundle().apply {
                         putParcelable(ARG_USER, user)
                     }
@@ -64,6 +64,8 @@ class ProfileFragment : Fragment(), PictureHelper.PictureListener {
         arguments?.let {
             user = it.getParcelable(ARG_USER)
         }
+        fragmentListener.fab.hide()
+
     }
 
     override fun onCreateView(
