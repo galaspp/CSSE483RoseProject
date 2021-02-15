@@ -66,6 +66,7 @@
     <string name="email">Email</string>
     <string name="google">Google</string>
     <string name="rosefire">Rosefire</string>
+    <string name="export_dialog_title">Do you want to export team data?</string>
 
     <string-array name="task_status_array">
         <item>Not Started</item>

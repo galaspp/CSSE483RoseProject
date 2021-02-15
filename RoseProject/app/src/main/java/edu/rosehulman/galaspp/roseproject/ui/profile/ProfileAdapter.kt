@@ -2,10 +2,14 @@ package edu.rosehulman.galaspp.roseproject.ui.profile
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.R
 import kotlin.collections.ArrayList
 
@@ -35,6 +39,21 @@ class ProfileAdapter(
     private fun remove(position: Int){
         userTeams.removeAt(position)
         notifyItemRemoved(position)
+    }
+
+    fun openExportDialog(position: Int, hasPermission: Boolean) {
+        if(!hasPermission){
+            Toast.makeText(context, "You do not have permission", Toast.LENGTH_SHORT)
+            return
+        }
+        userTeams[position]
+        val builder = AlertDialog.Builder(context!!)
+        builder.setTitle(R.string.export_dialog_title)
+        builder.setNeutralButton("NO") { _, _ -> }
+        builder.setPositiveButton("YES") { _, _ ->
+            Log.d(Constants.TAG, "Export ")
+        }
+        builder.show()
     }
 
 }
