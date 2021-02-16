@@ -71,6 +71,7 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         expListView.setAdapter(listAdapter)
 
         //Adjust size based on # of projects in view and if group is expanded
+        expListView.collapseGroup(0)
         val card : CardView = view.drawer_card_view
         val numProjects = team.projects.size
         //Add on click listeners to adjust size
@@ -81,7 +82,6 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         expListView.setOnGroupCollapseListener {
             card.layoutParams.height = DEFAULT_HEIGHT
         }
-
         expListView.setOnChildClickListener { parent, v, groupPosition, childPosition, id ->
             val childName = listAdapter.getChild(groupPosition, childPosition).toString()
             Log.d("test", "You clicked on project $childName!")

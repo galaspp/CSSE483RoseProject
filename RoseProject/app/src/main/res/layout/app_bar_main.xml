@@ -30,6 +30,7 @@
         android:layout_gravity="bottom|start"
         android:layout_margin="@dimen/fab_margin"
         android:backgroundTint="@color/rosered"
+        app:borderWidth="0dp"
         app:srcCompat="@android:drawable/ic_input_add"
         app:tint="@color/white"/>
 

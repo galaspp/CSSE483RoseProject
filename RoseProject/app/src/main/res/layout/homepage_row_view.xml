@@ -8,10 +8,9 @@
     android:layout_marginLeft="15dp"
     android:layout_marginRight="15dp"
     android:layoutDirection="ltr"
-    android:backgroundTint="@color/rosered">
+    android:backgroundTint="@color/black">
     <RelativeLayout
-        android:paddingBottom="2dp"
-        android:paddingEnd="2dp"
+        android:padding="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <androidx.cardview.widget.CardView

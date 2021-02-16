@@ -4,6 +4,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_marginTop="200dp"
+    android:layout_marginTop="100dp"
+    android:paddingTop="5dp"
+    android:background="@color/grayBackground"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"/>
+    android:layout_height="700dp"/>
