@@ -45,7 +45,7 @@ class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), Pi
     private val storageRef = FirebaseStorage
             .getInstance()
             .reference
-            .child("images")
+            .child(Constants.IMAGES)
 
     companion object {
         var listener: AuthenticationListener? = null
@@ -65,7 +65,6 @@ class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), Pi
             user = it.getParcelable(ARG_USER)
         }
         fragmentListener.fab.hide()
-
     }
 
     override fun onCreateView(
@@ -116,8 +115,8 @@ class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), Pi
     private fun showSignOutDialog(context: Context?) {
         val builder = AlertDialog.Builder(context!!)
         builder.setTitle(R.string.logout_confirmation)
-        builder.setNeutralButton("NO") { _, _ -> }
-        builder.setPositiveButton("YES") { _, _ ->
+        builder.setNeutralButton(R.string.No) { _, _ -> }
+        builder.setPositiveButton(R.string.Yes) { _, _ ->
             listener?.signOut()
         }
         builder.show()
@@ -128,9 +127,7 @@ class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), Pi
     }
 
     override fun getPictureTask(localPath: String) {
-        Log.d(Constants.TAG, "Get Picture Task")
         ImageRescaleTask(localPath).execute()
-
         //Set boolean to reopen profile fragement on main activity restart
         hasPicture = true
     }

@@ -2,7 +2,6 @@ package edu.rosehulman.galaspp.roseproject.ui.homepage
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
@@ -13,7 +12,6 @@ import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.FragmentListener
 import edu.rosehulman.galaspp.roseproject.R
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
-import edu.rosehulman.galaspp.roseproject.ui.project.ProjectFragment
 import edu.rosehulman.galaspp.roseproject.ui.project.TaskObject
 import kotlin.collections.ArrayList
 

@@ -30,14 +30,14 @@ class ProjectFragment : Fragment() {
     companion object {
         @JvmStatic
         fun newInstance(project: ProjectObject, userID: String, teamID: String, taskType: Int = 0) =
-                ProjectFragment().apply {
-                    arguments = Bundle().apply {
-                        putParcelable(ARG_PROJECT, project)
-                        putString(ARG_USER, userID)
-                        putString(ARG_TEAM, teamID)
-                        putInt(ARG_TYPE, taskType)
-                    }
+            ProjectFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ARG_PROJECT, project)
+                    putString(ARG_USER, userID)
+                    putString(ARG_TEAM, teamID)
+                    putInt(ARG_TYPE, taskType)
                 }
+            }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,13 +76,10 @@ class ProjectFragment : Fragment() {
 
         view.project_fragment_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
             override fun onNothingSelected(parent: AdapterView<*>?) {
-
             }
-
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     adapter.setFilter(position)
             }
-
         }
 
         if(context is FragmentListener) {
@@ -91,7 +88,6 @@ class ProjectFragment : Fragment() {
             }
             (context as FragmentListener).fab.show()
         }
-
         return view
     }
 }

@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,7 +43,7 @@ class NewUserFragment(
     private val storageRef = FirebaseStorage
         .getInstance()
         .reference
-        .child("images")
+        .child(Constants.IMAGES)
 
     companion object {
         var hasPicture = false
@@ -62,12 +61,6 @@ class NewUserFragment(
 
         app_bar_view.isVisible = false
 
-        //Allows user to set profile picture
-        view.profile_button_view.setOnClickListener {
-            //TODO: Find out how to import picture from phone gallery
-            Log.d(Constants.TAG, "Learn how to import pics and save to firebase")
-        }
-
         //Prepopulate fields if data exists
         if(user.name != ""){
             //Returns the substring of the name before and after the space
@@ -84,6 +77,7 @@ class NewUserFragment(
         } else {
             view.edit_username_view.setText(userGlobal)
         }
+
         //Set image button
         membersRef.document(user!!.id).addSnapshotListener{
                 documentSnapshot: DocumentSnapshot?,
@@ -94,6 +88,7 @@ class NewUserFragment(
                 user.photoID = photourl.toString()
             }
         }
+        //Allows user to set profile picture
         view.profile_button_view.setOnClickListener {
             //Save textbox data
             firstGlobal = view.edit_first_name_view.text.toString()
@@ -113,7 +108,7 @@ class NewUserFragment(
             if(usernameText.isEmpty() || lastName.isEmpty() || firstName.isEmpty()) {
                 Toast.makeText(
                     context!!,
-                    "Fields cannot be empty. Please re-enter your information.",
+                    R.string.emptyFields,
                     Toast.LENGTH_SHORT).show()
             } else{
                 //Look for any member object with usernameText as a field
@@ -125,14 +120,13 @@ class NewUserFragment(
                             view.edit_username_view.setTextColor(color)
                             Toast.makeText(
                                 context!!,
-                                "This username already exists. Please enter a new one.",
+                                R.string.uniqueUser,
                                 Toast.LENGTH_SHORT).show()
                         } else {
                             //Save information to firebase object
                             membersRef.document(user.id).update(Constants.NAME_FIELD, "$firstName $lastName")
                             membersRef.document(user.id).update(Constants.USERNAME_FIELD, usernameText)
                             app_bar_view.isVisible = true
-//                            listener.removeCurrentFragment()//Used to make the fragments not overlap upon reloading welcome screen
                             listener.openFragment(WelcomeFragment(user, listener), false, "welcome")
                         }
                     }
@@ -148,7 +142,6 @@ class NewUserFragment(
     }
 
     override fun getPictureTask(localPath: String) {
-        Log.d(Constants.TAG, "get pic task in newuwres")
         ImageRescaleTask(localPath).execute()
     }
 

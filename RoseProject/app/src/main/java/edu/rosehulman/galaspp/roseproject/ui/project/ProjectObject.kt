@@ -3,7 +3,6 @@ package edu.rosehulman.galaspp.roseproject.ui.project
 import android.os.Parcelable
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Exclude
-import edu.rosehulman.galaspp.roseproject.ui.createeditteam.TeamObject
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize

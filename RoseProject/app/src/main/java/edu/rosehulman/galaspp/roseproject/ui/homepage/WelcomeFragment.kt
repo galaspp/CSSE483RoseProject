@@ -1,7 +1,6 @@
 package edu.rosehulman.galaspp.roseproject.ui.homepage
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,10 +17,6 @@ import kotlinx.android.synthetic.main.fragment_welcome.view.*
 class WelcomeFragment(var user: MemberObject, val listener : FragmentListener) : Fragment() {
 
     private lateinit var adapter : HomepageAdapter
-
-    private val tasksRef = FirebaseFirestore
-        .getInstance()
-        .collection(Constants.TASKS_COLLECTION)
     private val membersRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
@@ -48,18 +43,14 @@ class WelcomeFragment(var user: MemberObject, val listener : FragmentListener) :
                 val mo = MemberObject.fromSnapshot(docChange.document)
                 if(mo.id == user.id && mo.statuses != user.statuses){
                     this.user = mo
-                    Log.d(Constants.TAG, mo.statuses.toString())
                     reload()
                 }
             }
-
         }
-
         return view
     }
 
-    fun reload() {
-        Log.d(Constants.TAG, "RELOAD")
+    private fun reload() {
         adapter.reload(user)
     }
 

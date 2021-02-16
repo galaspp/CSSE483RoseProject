@@ -1,11 +1,7 @@
 package edu.rosehulman.galaspp.roseproject
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -70,7 +66,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     lateinit var navAdapter: NavDrawerAdapter
     private val WRITE_EXTERNAL_STORAGE_PERMISSION = 2
     lateinit var welcomeFragment: WelcomeFragment
-//    override var startFragment : String = Constants.WELCOME
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,7 +104,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         membersRef.addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
             for (userChange in snapshot!!.documentChanges) {
                 if (userChange.type == DocumentChange.Type.MODIFIED && userChange.document.id == userObject.id) {
-                    Log.d(Constants.TAG, "User Changed")
                     userObject = MemberObject.fromSnapshot(userChange.document)
                     addTeamsToUserObject()
                 }
@@ -183,7 +177,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     private fun showCreateOrEditTeamModal(position: Int = -1, adapterNav: NavDrawerAdapter){
         //Create Builder
         val builder = AlertDialog.Builder(this)
-        builder.setTitle( if(position!=-1) "Edit Team" else "Create Team")
+        builder.setTitle( if(position!=-1) R.string.edit_team else R.string.create_team)
         val view = LayoutInflater.from(this).inflate(R.layout.create_team_modal, null, false)
         builder.setView(view)
         //Add Recycler View Layout
@@ -211,9 +205,8 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 }
             }
         }
-
         //Set Buttons
-        builder.setPositiveButton("Save") { _, _ ->
+        builder.setPositiveButton(R.string.Save) { _, _ ->
             //DONE: Create or Update Team Here
             if(position == -1){
                 val list = adapter.getMemberObjectIds()
@@ -243,44 +236,40 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 }
             }
         }
-
         if(position != -1){
-            builder.setNeutralButton("Delete"){_, _ ->
+            builder.setNeutralButton(R.string.Delete){_, _ ->
                 deleteTeamConfirmation(position)
             }
         }
-
-
         //Check permissions for current user to edit or create a team
         if((position != -1 && userObject.statuses[navAdapter.getTeamDetails(position).id] == Constants.OWNER) || position == -1) {
             builder.setNegativeButton(android.R.string.cancel, null)
             builder.create().show()
         } else {
             val parentLayout = findViewById<View>(android.R.id.content)
-            Snackbar.make(parentLayout, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(parentLayout, R.string.no_permission, Snackbar.LENGTH_LONG).show()
         }
-
     }
 
     private fun deleteTeamConfirmation(position: Int){
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Are you sure you want to delete this team?")
-        builder.setPositiveButton("Yes"){ _, _ ->
+        builder.setTitle(R.string.deleteTeam1)
+        builder.setPositiveButton(R.string.Yes){ _, _ ->
             val builder2 = AlertDialog.Builder(this)
-            builder2.setTitle("You cannot undo this operation. Tap OK to delete or CANCEL to leave.")
+            builder2.setTitle(R.string.deleteTeam2)
             builder2.setPositiveButton(android.R.string.ok){ _, _ ->
                 navAdapter.delete(position)
             }
             builder2.setNeutralButton(android.R.string.cancel){_, _ ->}
             builder2.show()
         }
-        builder.setNeutralButton("No"){_, _ ->}
+        builder.setNeutralButton(R.string.No){_, _ ->}
         builder.show()
     }
 
     private fun showAddRemoveMemberModal(adapter: CreateEditTeamAdapter, addTeamView: View, position: Int, adapterNav: NavDrawerAdapter){
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Add/Remove Member")
+        builder.setTitle(R.string.addRemoveMember)
         val view = LayoutInflater.from(this).inflate(R.layout.add_remove_members_modal, null, false)
         builder.setView(view)
 
@@ -295,7 +284,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         view.userPermissionSpinner.adapter = aa
 
         builder.setPositiveButton(R.string.add) { _, _ ->
-            membersRef.whereEqualTo("name", view.edit_text_member_username.text.toString()).get()
+            membersRef.whereEqualTo(Constants.NAME_FIELD, view.edit_text_member_username.text.toString()).get()
                 .addOnSuccessListener {
                     if(!it.isEmpty){
                         adapter.addMember(MemberObject.fromSnapshot(it.documents[0]), it.documents[0].id, view.userPermissionSpinner.selectedItemPosition)
@@ -305,7 +294,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
             }
         }
         builder.setNeutralButton(android.R.string.cancel, null)
-        builder.setNegativeButton("Remove") { _, _ ->
+        builder.setNegativeButton(R.string.remove) { _, _ ->
             adapter.removeName(view.edit_text_member_username.text.toString())
         }
         builder.create().show()
@@ -329,7 +318,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
 
     override fun onStop() {
         super.onStop()
-        Log.d(Constants.TAG, "STOPPPPED")
         auth.removeAuthStateListener(authStateListener)
     }
 
@@ -339,13 +327,13 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         // See https://firebase.google.com/docs/auth/users#the_user_lifecycle
         authStateListener = FirebaseAuth.AuthStateListener { auth: FirebaseAuth ->
             val user = auth.currentUser
-            Log.d(Constants.TAG, "In auth listener, User: $user")
+//            Log.d(Constants.TAG, "In auth listener, User: $user")
             if (user != null) {
-                Log.d(Constants.TAG, "UID: ${user.uid}")
-                Log.d(Constants.TAG, "Name: ${user.displayName}")
-                Log.d(Constants.TAG, "Email: ${user.email}")
-                Log.d(Constants.TAG, "Phone: ${user.phoneNumber}")
-                Log.d(Constants.TAG, "Photo URL: ${user.photoUrl}")
+//                Log.d(Constants.TAG, "UID: ${user.uid}")
+//                Log.d(Constants.TAG, "Name: ${user.displayName}")
+//                Log.d(Constants.TAG, "Email: ${user.email}")
+//                Log.d(Constants.TAG, "Phone: ${user.phoneNumber}")
+//                Log.d(Constants.TAG, "Photo URL: ${user.photoUrl}")
                 val userID = user.uid
                 membersRef.whereEqualTo("id", userID).get().addOnSuccessListener {
                     if(it.isEmpty){
@@ -364,7 +352,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                         userObject = MemberObject.fromSnapshot(it.documents[0])
                         app_bar_view.isVisible = true
                         startFirstFragment()
-//                        openFragment(WelcomeFragment(userObject.userName), false, "welcome")
                         navAdapter.userObject = userObject
                         addTeamsToUserObject()
                         navAdapter.logout()
@@ -380,7 +367,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
 
     private fun startFirstFragment(){
         //Used to return to fragment after a picture is retrieved from the camera or gallery
-        Log.d(Constants.TAG, "NU: ${NewUserFragment.hasPicture}")
         if(ProfileFragment.hasPicture){
             ProfileFragment.hasPicture = false
             openProfile(userObject)
@@ -449,7 +435,6 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         navAdapter.logout()
         onBackPressed() //Tom Foolery
         supportFragmentManager.fragments.clear()
-        Log.d(Constants.TAG, "F on backstack: ${supportFragmentManager.fragments.size}")
         auth.signOut()
     }
 
@@ -482,7 +467,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted
-                    Log.d(Constants.TAG, "Permission granted")
+//                    Log.d(Constants.TAG, "Permission granted")
                 } else {
                     // permission denied
                 }

@@ -38,7 +38,4 @@ class ProfileViewHolder : RecyclerView.ViewHolder {
             teamTitleTextView.setTextColor(color)
         }
     }
-
-
-
 }

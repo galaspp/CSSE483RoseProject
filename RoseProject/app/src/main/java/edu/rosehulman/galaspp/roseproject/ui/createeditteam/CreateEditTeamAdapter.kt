@@ -1,24 +1,15 @@
 package edu.rosehulman.galaspp.roseproject.ui.createeditteam
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
-import edu.rosehulman.galaspp.roseproject.Constants
 import edu.rosehulman.galaspp.roseproject.R
-import edu.rosehulman.galaspp.roseproject.ui.project.ProjectObject
 
 class CreateEditTeamAdapter(var context: Context) : RecyclerView.Adapter<CreateEditTeamHolder>() {
     private var listofusernames : ArrayList<MemberObject> = ArrayList()
     private var listOfIds : ArrayList<String> = ArrayList()
     private var listOfMemberStatus : ArrayList<Int> = ArrayList()
-
-    private val membersRef = FirebaseFirestore
-            .getInstance()
-            .collection(Constants.MEMBER_COLLECTION)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CreateEditTeamHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.create_edit_team_card_view, parent, false)

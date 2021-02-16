@@ -22,12 +22,10 @@ object Constants {
     const val PROVIDER_ROSE = 3
 
     const val OWNER = "Owner"
-    const val ADMIN = "Owner"
+//    const val ADMIN = "Admin"
     const val MEMBER = "Member"
 
     const val PHOTOID = "photoID"
-
-    const val FirstName = "first"
-    const val LastName = "last"
+    const val IMAGES = "images"
 
 }

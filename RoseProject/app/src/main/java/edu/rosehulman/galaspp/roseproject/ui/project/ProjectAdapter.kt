@@ -2,12 +2,10 @@ package edu.rosehulman.galaspp.roseproject.ui.project
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -54,21 +52,18 @@ class ProjectAdapter(
     }
 
     fun add(task: TaskObject){
-        tasksRef
-                .add(task)
-                .addOnSuccessListener { snapshot: DocumentReference ->
-                    projectsRef.document(project.id).update("taskReferences", FieldValue.arrayUnion(snapshot.id))
-                    task.id = snapshot.id
-                    project.projectTasks.add(task)
-                    notifyDataSetChanged()
-                }
+        tasksRef.add(task).addOnSuccessListener { snapshot: DocumentReference ->
+            projectsRef.document(project.id).update(Constants.TASKS_FIELD, FieldValue.arrayUnion(snapshot.id))
+            task.id = snapshot.id
+            project.projectTasks.add(task)
+            notifyDataSetChanged()
+        }
     }
 
     fun setFilter(position: Int) {
         itemFilter = position
         notifyDataSetChanged()
     }
-
 
     private fun editItem(position: Int, task: TaskObject) {
         tasksRef
@@ -88,12 +83,9 @@ class ProjectAdapter(
     private fun remove(position: Int){
         val taskId = project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].id
         project.projectTasks.removeAt(position)
-        tasksRef
-                .document(taskId)
-                .delete()
-                .addOnSuccessListener {
-                    projectsRef.document(project.id).update("taskReferences", FieldValue.arrayRemove(taskId))
-                }
+        tasksRef.document(taskId).delete().addOnSuccessListener {
+            projectsRef.document(project.id).update(Constants.TASKS_FIELD, FieldValue.arrayRemove(taskId))
+        }
         notifyItemRemoved(position)
     }
     @Suppress("UNCHECKED_CAST")
@@ -105,8 +97,7 @@ class ProjectAdapter(
             val allIDs = snapshot[Constants.MEMBERS_FIELD] as ArrayList<String>
             for(index in 0 until allIDs.size){
                 membersRef.document(allIDs[index]).get().addOnSuccessListener {
-                    Log.d(Constants.TAG, it["name"].toString())
-                    allNames.add(it["name"] as String)
+                    allNames.add(it[Constants.NAME_FIELD] as String)
                     if(index == allIDs.size-1){
                         showCreateorEditTaskModalHelper(position, taskName, urgency, assignedTo, status, allNames)
                     }
@@ -122,9 +113,9 @@ class ProjectAdapter(
         //TODO: Change title based on whether editing or creating team
         //TODO: Prepopulate items as needed
         if (position == -1)
-            builder.setTitle("Create Task?")
+            builder.setTitle(R.string.create_task)
         else
-            builder.setTitle("Edit Task?")
+            builder.setTitle(R.string.edit_task)
 
         val view = LayoutInflater.from(context).inflate(R.layout.create_edit_task_modal, null, false)
         builder.setView(view)
@@ -162,7 +153,7 @@ class ProjectAdapter(
             recyclerView.setHasFixedSize(true)
 
             view.submit_time_button.setOnClickListener {
-                var hours: Double = 0.0
+                var hours = 0.0
                 if(view.edit_text_log_hours.text.toString() != "")
                     hours = view.edit_text_log_hours.text.toString().toDouble()
                 project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours = project.projectTasks.filter { s -> s.currentStatus == itemFilter }[position].hours + hours
@@ -173,7 +164,7 @@ class ProjectAdapter(
             }
         }
 
-        builder.setPositiveButton("Save") { _, _ ->
+        builder.setPositiveButton(R.string.Save) { _, _ ->
             val assignedMember = view.edit_text_assign_description.text.toString()
             if (!allNames.contains(assignedMember)){
                 val taskNameOld = view.edit_text_task_name.text.toString()
@@ -218,11 +209,10 @@ class ProjectAdapter(
         builder.setNegativeButton(android.R.string.cancel, null)
 
         if(position != -1){
-            Log.d(Constants.TAG, userObject)
             membersRef.document(userObject).get().addOnSuccessListener {
                 val memObj = MemberObject.fromSnapshot(it)
                 if(memObj.statuses[teamId] == Constants.OWNER){
-                    builder.setNeutralButton("Delete") { _, _ ->
+                    builder.setNeutralButton(R.string.Delete) { _, _ ->
                         confirmDeleteModal(position)
                     }
                 }
@@ -245,18 +235,14 @@ class ProjectAdapter(
         return ret
     }
 
-    private fun confirmDeleteModal(position : Int)
-    {
+    private fun confirmDeleteModal(position : Int){
         val builder = AlertDialog.Builder(context)
         builder.setTitle(R.string.deleteTask)
         builder.setMessage(R.string.deleteTaskMessage)
-
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
             remove(position)
         }
-
         builder.setNegativeButton(android.R.string.cancel, null) //Do Nothing
-
         builder.create().show()
     }
 

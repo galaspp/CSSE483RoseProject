@@ -16,7 +16,7 @@ data class MemberObject(
     var photoID: String? = null
     @get: Exclude var teams = ArrayList<TeamObject>()
     @get: Exclude var bitmap : Bitmap? = null
-    companion object{
+    companion object {
         fun fromSnapshot(snapshot: DocumentSnapshot): MemberObject {
             val member = snapshot.toObject(MemberObject::class.java)!!
             member.id = snapshot.id

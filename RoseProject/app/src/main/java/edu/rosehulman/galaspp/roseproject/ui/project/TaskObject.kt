@@ -4,7 +4,6 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp
-import edu.rosehulman.galaspp.roseproject.ui.createeditteam.TeamObject
 
 data class TaskObject (
     var name : String = "",

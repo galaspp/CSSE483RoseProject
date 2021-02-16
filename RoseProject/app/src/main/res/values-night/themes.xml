@@ -2,15 +2,44 @@
     <!-- Base application theme. -->
     <style name="Theme.RoseProject" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorPrimary">@color/rosered</item>
+        <item name="colorPrimaryVariant">@color/rosered</item>
+        <item name="colorOnPrimary">@color/white</item>
+
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/black</item>
         <!-- Customize your theme here. -->
+        <item name="android:fontFamily">@font/nexa_light</item>
+        <item name="fontFamily">@font/nexa_light</item>
     </style>
+
+    <style name="Theme.RoseProject.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:fontFamily">@font/nexa_bold</item>
+        <item name="fontFamily">@font/nexa_bold</item>
+    </style>
+
+    <style name="Theme.RoseProject.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:backgroundTint">@color/rosered</item>
+        <item name="android:fontFamily">@font/nexa_bold</item>
+        <item name="fontFamily">@font/nexa_bold</item>
+    </style>
+
+    <style name="Theme.RoseProject.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="Theme.TaskText" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="LoginTheme" parent="FirebaseUI">
+        <item name="android:statusBarColor">@color/rosered</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/rosered</item>
+
+    </style>
+
 </resources>

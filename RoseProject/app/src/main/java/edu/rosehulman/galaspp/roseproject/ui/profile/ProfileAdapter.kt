@@ -43,17 +43,17 @@ class ProfileAdapter(
 
     fun openExportDialog(position: Int, hasPermission: Boolean) {
         if(!hasPermission){
-            Toast.makeText(context, "You do not have permission", Toast.LENGTH_SHORT)
+            Toast.makeText(context, R.string.no_permission, Toast.LENGTH_SHORT)
             return
         }
-        userTeams[position]
-        val builder = AlertDialog.Builder(context!!)
-        builder.setTitle(R.string.export_dialog_title)
-        builder.setNeutralButton("NO") { _, _ -> }
-        builder.setPositiveButton("YES") { _, _ ->
-            Log.d(Constants.TAG, "Export ")
-        }
-        builder.show()
+//        userTeams[position]
+//        val builder = AlertDialog.Builder(context!!)
+//        builder.setTitle(R.string.export_dialog_title)
+//        builder.setNeutralButton(R.string.No) { _, _ -> }
+//        builder.setPositiveButton(R.string.Yes) { _, _ ->
+//            Log.d(Constants.TAG, "Export ")
+//        }
+//        builder.show()
     }
 
 }

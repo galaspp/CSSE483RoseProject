@@ -29,7 +29,7 @@
         android:id="@+id/your_tasks"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Your Tasks"
+        android:text="@string/your_tasks"
         android:textSize="35sp"
         android:textStyle="bold"
         android:textColor="@color/white"

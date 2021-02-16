@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import edu.rosehulman.galaspp.roseproject.R
-import kotlinx.android.synthetic.main.task_log_card_view.view.*
 
 class TaskLogAdapter(private var context: Context, private var arrayList: ArrayList<String>
 ): RecyclerView.Adapter<TaskLogViewHolder>() {

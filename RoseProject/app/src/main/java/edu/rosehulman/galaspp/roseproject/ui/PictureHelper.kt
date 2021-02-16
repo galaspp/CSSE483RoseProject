@@ -46,7 +46,6 @@ class PictureHelper(
     // https://developer.android.com/training/camera/photobasics
     private fun launchCameraIntent() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            Log.d(Constants.TAG, "launch cam")
             // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(activity.packageManager)?.also {
                 // Create the File where the photo should go
@@ -60,7 +59,6 @@ class PictureHelper(
                 // Continue only if the File was successfully created
                 photoFile?.also {
                     // authority declared in manifest
-                    Log.d(Constants.TAG, "photfile")
                     val photoURI: Uri = FileProvider.getUriForFile(
                             context,
                             "edu.rosehulman.galaspp.roseproject",
@@ -97,21 +95,18 @@ class PictureHelper(
         choosePictureIntent.addCategory(Intent.CATEGORY_OPENABLE)
         choosePictureIntent.type = "image/*"
         if (choosePictureIntent.resolveActivity(context.packageManager) != null) {
-            Log.d(Constants.TAG, "Start activity")
+//            Log.d(Constants.TAG, "Start activity")
             fragment.startActivityForResult(choosePictureIntent, RC_CHOOSE_PICTURE)
         }
     }
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d(Constants.TAG, "results")
         if (resultCode == RESULT_OK) {
             when (requestCode) {
                 RC_TAKE_PICTURE -> {
-                    Log.d(Constants.TAG, "take")
                     sendCameraPhotoToAdapter()
                 }
                 RC_CHOOSE_PICTURE -> {
-                    Log.d(Constants.TAG, "choose")
                     sendGalleryPhotoToAdapter(data)
                 }
             }
@@ -120,15 +115,13 @@ class PictureHelper(
 
     private fun sendCameraPhotoToAdapter() {
         addPhotoToGallery()
-        Log.d(Constants.TAG, "Sending to adapter this photo: $currentPhotoPath")
-//        adapter.add(currentPhotoPath)
         listener.getPictureTask(currentPhotoPath)
     }
 
     private fun sendGalleryPhotoToAdapter(data: Intent?) {
         if (data != null && data.data != null) {
             val location = data.data!!.toString()
-//            adapter.add(location)
+            listener.getPictureTask(location)
         }
     }
 
@@ -142,9 +135,6 @@ class PictureHelper(
     }
 
     fun getPicture() {
-//        this.context = context
-//        this.activity = activity
-//        this.fragment = fragment
         showPictureDialog()
     }
 

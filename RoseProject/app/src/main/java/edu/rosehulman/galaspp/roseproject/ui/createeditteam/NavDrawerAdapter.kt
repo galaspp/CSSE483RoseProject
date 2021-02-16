@@ -100,89 +100,74 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
     }
 
     private fun getProjectsFromIDs(projIds : ArrayList<String>, tm : TeamObject) {
-//    private fun getProjectsFromIDs(position: Int) {
         //Get top level projects reference from firebase
         //loop over ids and match with documents from projects reference, then convert and add to lists
         projectReturnReference = projectsRef
-                .addSnapshotListener {snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
-                    if(exception != null) {
-                        Log.e("Nav Drawer Error", "Listen Error: $exception")
-                        return@addSnapshotListener
-                    }
-                    for(projChange in snapshot!!.documentChanges) {
-                        val po = ProjectObject.fromSnapshot(projChange.document)
-//                        Log.d("TEST", teams[position].teamName)
-                        if(projIds.contains(po.id)) {
-                            when (projChange.type) {
-                                DocumentChange.Type.ADDED -> {
-//                                    Log.d("TEST", po.projectTitle)
-                                    getTasksFromIDs(po.taskReferences, po)
-                                    tm.projects.add(0, po)
-                                    notifyDataSetChanged()
-                                }
-                                DocumentChange.Type.REMOVED -> {
-                                    deleteTaskReferences(po.taskReferences)
-                                }
-                                DocumentChange.Type.MODIFIED -> {
-                                    val pos = tm.projects.indexOfFirst { po.id == it.id }
-                                    tm.projects[pos] = po
-//                                getProjectsFromIDs(team.projectReferences, team)
-                                    getTasksFromIDs(po.taskReferences, po)
-                                    notifyItemChanged(pos)
-//                                    notifyDataSetChanged()
-                                }
+            .addSnapshotListener {snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
+                if(exception != null) {
+                    Log.e("Nav Drawer Error", "Listen Error: $exception")
+                    return@addSnapshotListener
+                }
+                for(projChange in snapshot!!.documentChanges) {
+                    val po = ProjectObject.fromSnapshot(projChange.document)
+                    if(projIds.contains(po.id)) {
+                        when (projChange.type) {
+                            DocumentChange.Type.ADDED -> {
+                                getTasksFromIDs(po.taskReferences, po)
+                                tm.projects.add(0, po)
+                                notifyDataSetChanged()
+                            }
+                            DocumentChange.Type.REMOVED -> {
+                                deleteTaskReferences(po.taskReferences)
+                            }
+                            DocumentChange.Type.MODIFIED -> {
+                                val pos = tm.projects.indexOfFirst { po.id == it.id }
+                                tm.projects[pos] = po
+                                getTasksFromIDs(po.taskReferences, po)
+                                notifyItemChanged(pos)
                             }
                         }
                     }
                 }
+            }
     }
 
     private fun getTasksFromIDs(ids : ArrayList<String>, po : ProjectObject) {
         //Get top level task reference from firebase
         //loop over ids and match with documents from tasks reference, then convert and add to lists
         taskReturnReference = tasksRef
-//                .whereEqualTo("id", ids)
-                .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
-                    if (exception != null) {
-                        Log.e("Nav Drawer Error", "Listen Error: $exception")
-                        return@addSnapshotListener
-                    }
-                    for (taskChange in snapshot!!.documentChanges) {
-                        val task = TaskObject.fromSnapshot(taskChange.document)
-                        if (ids.contains(task.id)) {
-                            when (taskChange.type) {
-                                DocumentChange.Type.ADDED -> {
-                                    po.projectTasks.add(task)
-                                    notifyDataSetChanged()
-                                }
-                                DocumentChange.Type.REMOVED -> {
+            .addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
+                if (exception != null) {
+                    Log.e("Nav Drawer Error", "Listen Error: $exception")
+                    return@addSnapshotListener
+                }
+                for (taskChange in snapshot!!.documentChanges) {
+                    val task = TaskObject.fromSnapshot(taskChange.document)
+                    if (ids.contains(task.id)) {
+                        when (taskChange.type) {
+                            DocumentChange.Type.ADDED -> {
+                                po.projectTasks.add(task)
+                                notifyDataSetChanged()
+                            }
+                            DocumentChange.Type.REMOVED -> {
 //                                val pos = teams.indexOfFirst { team.id == it.id }
 //                                deleteProjectReferences(team.projectReferences)
 //                                teams.removeAt(pos)
 //                                notifyItemRemoved(pos)
-                                }
-                                DocumentChange.Type.MODIFIED -> {
+                            }
+                            DocumentChange.Type.MODIFIED -> {
 //                                val pos = teams.indexOfFirst{ team.id == it.id }
 //                                teams[pos] = team
 //                                getProjectsFromIDs(team.projectReferences, team)
 //                                notifyItemChanged(pos)
-                                }
                             }
                         }
                     }
                 }
-//        for (id in ids) {
-//            tasksRef.document(id).get().addOnSuccessListener{snapshot: DocumentSnapshot ->
-//                val task = TaskObject.fromSnapshot(snapshot)
-//                po.projectTasks.add(task)
-//                notifyDataSetChanged()
-//            }
-//        }
+            }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NavDrawerHolder {
-//        val view = LayoutInflater.from(context).inflate(R.layout.drawer_card_view, parent, false)
-//        return NavDrawerHolder(context, view, this)
         viewNavDrawer = LayoutInflater.from(context).inflate(R.layout.drawer_card_view, parent, false)
         return NavDrawerHolder(context, viewNavDrawer, this)
     }
@@ -198,7 +183,6 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
 
     fun addTeam(team: TeamObject, list: ArrayList<String>, statusList: ArrayList<Int>){
         //Add team to firebase and its reference to the member along with the member's status
-        Log.d(Constants.TAG, "Adding a team: ${team.teamName}")
         teamsRef.add(team).addOnSuccessListener {
             val nestedData = hashMapOf(it.id to Constants.OWNER)
             val data = hashMapOf(Constants.STATUSES_FIELD to nestedData)
@@ -207,7 +191,6 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
             //TODO: FIX this error when you create a new team
             if(list.size != 0 && statusList.size != 0) {
                 for (i in 0 until statusList.size) {
-//                    var nestedData: HashMap<String, String>
                     val nestedData2 = if (statusList[i] == 0) {
                         hashMapOf(it.id to Constants.MEMBER)
                     } else {
@@ -244,26 +227,19 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
         teams[position].teamName = teamName
         teams[position].teamDescription = teamDescription
 
-        for(i in 0 until teams[position].teamMemberReferences.size)
-        {
-            if(!members.contains(teams[position].teamMemberReferences[i]))
-            {
+        for(i in 0 until teams[position].teamMemberReferences.size) {
+            if(!members.contains(teams[position].teamMemberReferences[i])) {
                 memberRef.document(teams[position].teamMemberReferences[i]).get().addOnSuccessListener {
                     val memberObject = MemberObject.fromSnapshot(it)
                     val membersToRemove = (it[Constants.STATUSES_FIELD] as MutableMap<String, String>)
                     membersToRemove.remove(teams[position].id)
                     memberObject.statuses = membersToRemove
-//                    val data = hashMapOf(Constants.STATUSES_FIELD to membersToRemove)
                     memberRef.document(memberObject.id).set(memberObject)
                 }
             }
         }
         teams[position].teamMemberReferences = members
-//        teams[position].projects = projects
-//        this.projects[teams[position].teamName] = projects
-
         teamsRef.document(teams[position].id).set(teams[position])
-//        notifyItemChanged(position)
     }
 
 
@@ -271,18 +247,18 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
         //Check if user has permision to create/edit project within the team
         if(userObject?.statuses?.get(team?.id) == Constants.OWNER) {
             val builder = AlertDialog.Builder(context)
-            builder.setTitle(if(childPosition==-1)"Create Project?" else "Edit Project?")
+            builder.setTitle(if(childPosition==-1) R.string.create_project else R.string.edit_project)
             val view = LayoutInflater.from(context).inflate(R.layout.create_project_modal, null, false)
             builder.setView(view)
             if(childPosition != -1){
                 Log.d(Constants.TAG, project!!.projectTitle)
                 view.edit_text_project_name.setText(project!!.projectTitle)
                 view.edit_text_project_description.setText(project.projectDescription)
-                builder.setNeutralButton("Delete") { _,_ ->
+                builder.setNeutralButton(R.string.Delete) { _,_ ->
                     confirmDeleteModal(project, team!!)
                 }
             }
-            builder.setPositiveButton("Save") { _, _ ->
+            builder.setPositiveButton(R.string.Save) { _, _ ->
                 if(childPosition == -1) {
                     // Create Project from dialog boxes
                     val addedProject = ProjectObject(view.edit_text_project_name.text.toString(),
@@ -301,7 +277,7 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
             builder.setNegativeButton(android.R.string.cancel, null)
             builder.create().show()
         } else {
-            Snackbar.make(viewNavDrawer, "You do not have this permission!", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(viewNavDrawer, R.string.no_permission, Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -309,13 +285,10 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
         val builder = AlertDialog.Builder(context)
         builder.setTitle(R.string.deleteProject)
         builder.setMessage(R.string.deleteProjectMessage)
-
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
             removeProject(project, team)
         }
-
         builder.setNegativeButton(android.R.string.cancel, null) //Do Nothing
-
         builder.create().show()
     }
 
@@ -325,21 +298,12 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
         //Delete Project in project ref
         projectsRef.document(project.id).delete().addOnSuccessListener {
             //delete Project from ref in team Ref
-            teamsRef.document(team.id).update("projectReferences", FieldValue.arrayRemove(project.id))
+            teamsRef.document(team.id).update(Constants.PROJECTS_FIELD, FieldValue.arrayRemove(project.id))
         }
     }
 
     @Suppress("UNCHECKED_CAST")
     fun delete(position: Int) {
-//        val teamID = teams[position].id
-//        userObject?.id?.let { userID ->
-//            memberRef.document(userID).get().addOnSuccessListener {
-//                val statuses = it[Constants.STATUSES_FIELD] as MutableMap<String, String>
-//                statuses.remove(teamID)
-//                memberRef.document(userID).update(Constants.STATUSES_FIELD, statuses)
-//            }
-//        }
-//        teamsRef.document(teamID).delete()
         val teamID = teams[position].id
         memberRef.get().addOnSuccessListener { snapshot: QuerySnapshot ->
             for(snap in snapshot.documents) {

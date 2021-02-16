@@ -1,12 +1,10 @@
 package edu.rosehulman.galaspp.roseproject.ui.createeditteam
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import android.view.View
 import android.widget.ExpandableListView
 import android.widget.PopupMenu
-import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
@@ -29,8 +27,8 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
     init {
         val dropDownMenu = PopupMenu(itemView.context, itemView.card_options_button)
         val menu = dropDownMenu.menu
-        menu.add(0, 0, 0, "Create Project")
-        menu.add(0, 1, 0, "Edit Team")
+        menu.add(0, 0, 0, R.string.create_project)
+        menu.add(0, 1, 0, R.string.edit_team)
         dropDownMenu.menuInflater.inflate(R.menu.team_menu_options, menu)
         dropDownMenu.setOnMenuItemClickListener {
             when (it.itemId) {
@@ -84,7 +82,7 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         }
         expListView.setOnChildClickListener { parent, v, groupPosition, childPosition, id ->
             val childName = listAdapter.getChild(groupPosition, childPosition).toString()
-            Log.d("test", "You clicked on project $childName!")
+//            Log.d("test", "You clicked on project $childName!")
             val project = team.projects[childPosition]
             val projectName = team.projects[childPosition].projectTitle
             adapter.userObject?.let { ProjectFragment.newInstance(project, it.id, team.id) }?.let {
@@ -95,7 +93,7 @@ class NavDrawerHolder(var context: Context, itemView: View, var adapter: NavDraw
         }
 
         expListView.setOnItemLongClickListener { parent, view, position, id ->
-            Log.d(Constants.TAG, "position $position")
+//            Log.d(Constants.TAG, "position $position")
             val index = position - 1
             if(index < 0){
                 adapter.showCreateProjectModal(index, null, team)

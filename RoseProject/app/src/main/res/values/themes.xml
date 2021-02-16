@@ -7,13 +7,10 @@
         <item name="colorOnPrimary">@color/white</item>
 
         <!-- Status bar color. -->
-<!--        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>-->
         <item name="android:statusBarColor" tools:targetApi="l">@color/black</item>
         <!-- Customize your theme here. -->
         <item name="android:fontFamily">@font/nexa_light</item>
         <item name="fontFamily">@font/nexa_light</item>
-<!--        <item name="android:fontFamily">@font/walkway_black</item>-->
-<!--        <item name="fontFamily">@font/walkway_black</item>-->
     </style>
 
     <style name="Theme.RoseProject.NoActionBar">

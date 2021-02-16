@@ -1,6 +1,5 @@
 package edu.rosehulman.galaspp.roseproject.ui.createeditteam
 
-import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Exclude
