@@ -14,7 +14,7 @@ import edu.rosehulman.galaspp.roseproject.R
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
 import kotlinx.android.synthetic.main.fragment_welcome.view.*
 
-class WelcomeFragment(var user: MemberObject, val listener : FragmentListener) : Fragment() {
+class WelcomeFragment(var user: MemberObject, val listener: FragmentListener, val firstName: String) : Fragment() {
 
     private lateinit var adapter : HomepageAdapter
     private val membersRef = FirebaseFirestore
@@ -30,7 +30,7 @@ class WelcomeFragment(var user: MemberObject, val listener : FragmentListener) :
 
         listener.fab.hide()
 
-        view.welcome_name_text_view.text = "Welcome, ${user.name.substringBefore(" ")}"
+        view.welcome_name_text_view.text = "Welcome, $firstName"
         //Create recycler view for list of teams
         val recyclerView = view.findViewById<RecyclerView>(R.id.homepage_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -44,6 +44,7 @@ class WelcomeFragment(var user: MemberObject, val listener : FragmentListener) :
                 if(mo.id == user.id && mo.statuses != user.statuses){
                     this.user = mo
                     reload()
+                    view.welcome_name_text_view.text = "Welcome, $firstName"
                 }
             }
         }

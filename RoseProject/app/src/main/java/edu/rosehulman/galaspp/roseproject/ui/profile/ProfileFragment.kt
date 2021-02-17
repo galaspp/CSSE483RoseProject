@@ -27,6 +27,7 @@ import com.squareup.picasso.Picasso
 import edu.rosehulman.galaspp.roseproject.*
 import edu.rosehulman.galaspp.roseproject.ui.PictureHelper
 import edu.rosehulman.galaspp.roseproject.ui.createeditteam.MemberObject
+import edu.rosehulman.galaspp.roseproject.ui.createeditteam.TeamObject
 import kotlinx.android.synthetic.main.fragment_profile.view.*
 import java.io.ByteArrayOutputStream
 import kotlin.random.Random
@@ -36,12 +37,15 @@ private const val ARG_USER = "user"
 @SuppressLint("UseRequireInsteadOfGet")
 class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), PictureHelper.PictureListener {
 
-    private var user: MemberObject? = null
+    private var userID: String? = null
     private lateinit var adapter: ProfileAdapter
     private lateinit var pictureHelper: PictureHelper
     private val membersRef = FirebaseFirestore
             .getInstance()
             .collection(Constants.MEMBER_COLLECTION)
+    private val teamsRef = FirebaseFirestore
+            .getInstance()
+            .collection(Constants.TEAMS_COLLECTION)
     private val storageRef = FirebaseStorage
             .getInstance()
             .reference
@@ -51,10 +55,10 @@ class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), Pi
         var listener: AuthenticationListener? = null
         var hasPicture = false
         @JvmStatic
-        fun newInstance(user: MemberObject, fragmentListener : FragmentListener) =
+        fun newInstance(userID: String , fragmentListener : FragmentListener) =
                 ProfileFragment(fragmentListener).apply {
                     arguments = Bundle().apply {
-                        putParcelable(ARG_USER, user)
+                        putString(ARG_USER, userID)
                     }
                 }
     }
@@ -62,7 +66,7 @@ class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), Pi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            user = it.getParcelable(ARG_USER)
+            userID = it.getString(ARG_USER)
         }
         fragmentListener.fab.hide()
     }
@@ -75,19 +79,6 @@ class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), Pi
 
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        //Populate fields
-        view.name_text_view.text = user?.name
-        view.username_text_view.text = user?.userName
-
-        //Set image button
-        membersRef.document(user!!.id).addSnapshotListener{
-                documentSnapshot: DocumentSnapshot?,
-                firebaseFirestoreException: FirebaseFirestoreException? ->
-            val photourl = documentSnapshot?.get(Constants.PHOTOID)
-            if(photourl!=null && photourl.toString().isNotEmpty()){
-                Picasso.get().load(photourl.toString()).into(view.profile_image)
-            }
-        }
         view.profile_image.setOnClickListener {
             pictureHelper.getPicture()
         }
@@ -103,10 +94,32 @@ class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), Pi
         recyclerView.setHasFixedSize(true)
         adapter = ProfileAdapter(context)
         recyclerView.adapter = adapter
+        adapter.userTeams.clear()
 
-        for (team in user!!.teams) {
-            adapter.add(ProfileTeamModel(team.teamName, user!!.statuses[team.id] ?: error("")))
+        membersRef.document(userID!!).addSnapshotListener{
+            documentSnapshot: DocumentSnapshot?,
+            firebaseFirestoreException: FirebaseFirestoreException? ->
+
+            //Populate fields
+            view.name_text_view.text = documentSnapshot?.get(Constants.NAME_FIELD).toString()
+            view.username_text_view.text = documentSnapshot?.get(Constants.USERNAME_FIELD).toString()
+
+            //Set image button
+            val photourl = documentSnapshot?.get(Constants.PHOTOID)
+            if(photourl!=null && photourl.toString().isNotEmpty()){
+                Picasso.get().load(photourl.toString()).into(view.profile_image)
+            }
+
+            val teamIDs = (documentSnapshot?.get(Constants.STATUSES_FIELD) as Map<String, String>)
+
+            for (teamID in teamIDs.keys) {
+                teamsRef.document(teamID).get().addOnSuccessListener { teamSnap: DocumentSnapshot ->
+                    val to = TeamObject.fromSnapshot(teamSnap)
+                    adapter.add(ProfileTeamModel(to.teamName, teamIDs[teamID] ?: "Member"))
+                }
+            }
         }
+
         //TODO: Possibly refactor as to not send "this" twice
         pictureHelper = PictureHelper(context!!, activity!!, this, this)
         return view
@@ -145,10 +158,6 @@ class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), Pi
         }
     }
     private fun storageAdd(bitmap: Bitmap?) {
-        //Delete old picture
-        if(user?.photoID!=null){
-            FirebaseStorage.getInstance().getReferenceFromUrl(user?.photoID!!).delete()
-        }
         val baos = ByteArrayOutputStream()
         bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val data = baos.toByteArray()
@@ -165,7 +174,7 @@ class ProfileFragment (val fragmentListener : FragmentListener) : Fragment(), Pi
             if(task.isSuccessful){
                 val downloadUri = task.result
                 val map = hashMapOf(Constants.PHOTOID to downloadUri.toString())
-                membersRef.document(user!!.id).set(map, SetOptions.merge())
+                membersRef.document(userID!!).set(map, SetOptions.merge())
             }
         }
     }

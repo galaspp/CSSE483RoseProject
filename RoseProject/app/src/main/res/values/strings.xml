@@ -95,7 +95,7 @@
 
     <string name="addRemoveMember">Add/Remove Member</string>
     <string name="deleteTeam1">Are you sure you want to delete this team?</string>
-    <string name="deleteTeam2">You cannot undo this operation. Tap OK to delete or CANCEL to leave.</string>
+    <string name="deleteTeam2">You cannot undo this. Tap OK to delete or CANCEL to leave.</string>
     <string name="emptyFields">Fields cannot be empty. Please re-enter your information.</string>
     <string name="uniqueUser">This username already exists. Please enter a new one.</string>
     <string name="todo">TODO</string>

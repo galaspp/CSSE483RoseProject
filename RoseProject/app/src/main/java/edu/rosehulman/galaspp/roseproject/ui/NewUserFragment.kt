@@ -127,7 +127,7 @@ class NewUserFragment(
                             membersRef.document(user.id).update(Constants.NAME_FIELD, "$firstName $lastName")
                             membersRef.document(user.id).update(Constants.USERNAME_FIELD, usernameText)
                             app_bar_view.isVisible = true
-                            listener.openFragment(WelcomeFragment(user, listener), false, "welcome")
+                            listener.openFragment(WelcomeFragment(user, listener, firstName), false, "welcome")
                         }
                     }
             }

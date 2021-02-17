@@ -17,7 +17,7 @@ class ProfileAdapter(
         private var context: Context?
 ) : RecyclerView.Adapter<ProfileViewHolder>(){
 
-    private val userTeams = ArrayList<ProfileTeamModel>()
+    val userTeams = ArrayList<ProfileTeamModel>()
 
     override fun getItemCount() = userTeams.size
 

@@ -2,6 +2,7 @@ package edu.rosehulman.galaspp.roseproject.ui.project
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View.VISIBLE
 import android.view.ViewGroup
@@ -96,9 +97,11 @@ class ProjectAdapter(
         teamsRef.document(teamId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
             val allIDs = snapshot[Constants.MEMBERS_FIELD] as ArrayList<String>
             for(index in 0 until allIDs.size){
+                Log.d(Constants.TAG, index.toString())
                 membersRef.document(allIDs[index]).get().addOnSuccessListener {
                     allNames.add(it[Constants.NAME_FIELD] as String)
                     if(index == allIDs.size-1){
+                        Log.d(Constants.TAG, allNames.toString())
                         showCreateorEditTaskModalHelper(position, taskName, urgency, assignedTo, status, allNames)
                     }
                 }

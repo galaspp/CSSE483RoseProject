@@ -156,8 +156,9 @@ class NavDrawerAdapter (val context: Context, val listener: OnNavDrawerListener,
 //                                notifyItemRemoved(pos)
                             }
                             DocumentChange.Type.MODIFIED -> {
-//                                val pos = teams.indexOfFirst{ team.id == it.id }
-//                                teams[pos] = team
+                                val pos = po.projectTasks.indexOfFirst{ task.id == it.id }
+                                po.projectTasks[pos] = task
+                                notifyDataSetChanged()
 //                                getProjectsFromIDs(team.projectReferences, team)
 //                                notifyItemChanged(pos)
                             }

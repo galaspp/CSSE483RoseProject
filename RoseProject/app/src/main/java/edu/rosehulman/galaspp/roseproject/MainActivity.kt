@@ -109,6 +109,15 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 }
             }
         }
+        //Snapshot Listener for team reference that updates current user after teams change
+        teamsRef.addSnapshotListener { snapshot: QuerySnapshot?, exception: FirebaseFirestoreException? ->
+            for (teamChange in snapshot!!.documentChanges) {
+                if (teamChange.type == DocumentChange.Type.MODIFIED && userObject.statuses.containsKey(teamChange.document.id) ) {
+                    userObject = getUpdatedUser()!!
+                    addTeamsToUserObject()
+                }
+            }
+        }
         checkPermissions()
     }
 
@@ -125,7 +134,7 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
                 true
             }
             R.id.action_profile -> {
-                openProfile(userObject)
+                openProfile(userObject.id)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -133,12 +142,12 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
     }
 
     //FRAGMENTS
-    override fun openProfile(user: MemberObject){
+    override fun openProfile(userID: String){
         //Prevent multiple profiles being added to backstack
         val backStackSize = supportFragmentManager.backStackEntryCount
         if(backStackSize == 0 || supportFragmentManager.getBackStackEntryAt(backStackSize - 1).name != "profile"){
             //Add profile fragment
-            val profileFragment = ProfileFragment.newInstance(user, this)
+            val profileFragment = ProfileFragment.newInstance(userID, this)
             val ft = supportFragmentManager.beginTransaction()
             ft.replace(R.id.fragment_container, profileFragment)
             ft.addToBackStack("profile")
@@ -369,12 +378,12 @@ class MainActivity : AppCompatActivity(), NavDrawerAdapter.OnNavDrawerListener,
         //Used to return to fragment after a picture is retrieved from the camera or gallery
         if(ProfileFragment.hasPicture){
             ProfileFragment.hasPicture = false
-            openProfile(userObject)
+            openProfile(userObject.id)
         } else if(NewUserFragment.hasPicture){
             NewUserFragment.hasPicture = false
             openFragment(NewUserFragment(this, userObject, appBar), false, "new user")
         } else {
-            welcomeFragment = WelcomeFragment(userObject, this)
+            welcomeFragment = WelcomeFragment(userObject, this, userObject.name.substringBefore(" "))
             openFragment(welcomeFragment, false, "welcome")
         }
     }
